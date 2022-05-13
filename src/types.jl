@@ -40,9 +40,9 @@ function Base.show(io::IO, ast::ObaAST)
     # data
     if nchilds > 0
         print(io, "\nchild(s):")
-        _show_data_preview(io, ast) do child
+        _show_data_preview(io, ast) do chidx, child
             child isa EmptyLineAST && return false # ignore empty
-            print(io, "\n[", child.line, "] ")
+            print(io, "\n[", chidx, "] ")
             show(io, child)
             return false
         end

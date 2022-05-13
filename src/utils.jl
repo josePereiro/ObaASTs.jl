@@ -52,7 +52,7 @@ function _show_data_preview(f::Function, io::IO, col)
             break
         end
 
-        ret = f(dat)
+        ret = f(i, dat)
         ret === false && continue
         print(io, "\n", _preview(io, string(ret)))
     end

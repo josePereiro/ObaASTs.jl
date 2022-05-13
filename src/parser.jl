@@ -7,9 +7,6 @@ const YAML_BLOCK = :YAML_BLOCK
 const COMMENT_BLOCK = :COMMENT_BLOCK
 const LATEX_BLOCK = :LATEX_BLOCK
 const CODE_BLOCK = :CODE_BLOCK
-const HEADER = :HEADER
-const TEXT_LINE = :TEXT_LINE
-const EMPTY_LINE = :EMPTY_LINE
 
 # ------------------------------------------------------------------
 # This assume a per-line compatible file. Obsidian is more flexible.
