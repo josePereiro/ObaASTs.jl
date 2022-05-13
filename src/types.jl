@@ -6,11 +6,6 @@ abstract type AbstractObaASTBlock <: AbstractObaAST end
 abstract type AbstractObaASTLine <: AbstractObaAST end
 abstract type AbstractObaASTObj <: AbstractObaAST end
 
-join_src(ast::AbstractObaAST, args...) = error("method join_src(", typeof(ast), ") not defined")
-join_src(ast::AbstractObaASTBlock, args...) = join(ast.src, args...)
-join_src(ast::AbstractObaASTLine, args...) = ast.src
-join_src(ast::AbstractObaASTObj, args...) = ast.src
-
 function Base.show(io::IO, ast:: AbstractObaAST)
     print(io, nameof(typeof(ast)), " \"", _preview(io, join_src(ast, "\\n")), "\"")
 end
@@ -71,6 +66,14 @@ mutable struct TagAST <: AbstractObaASTObj
     labels::Vector{String}
 end
 
+## ------------------------------------------------------------------
+# BlockLinkLineAST
+mutable struct BlockLinkLineAST <: AbstractObaASTObj
+    parent::ObaAST
+    line::Int
+    src::String
+    link::String
+end
 
 ## ------------------------------------------------------------------
 # TextLineAST
@@ -124,7 +127,7 @@ mutable struct LatexBlockAST <: AbstractObaASTBlock
     parent::ObaAST
     line::Int
     src::Vector{String}
-    txt::String
+    latex::String
     tag::Union{LatexTagAST, Nothing}
 end
 

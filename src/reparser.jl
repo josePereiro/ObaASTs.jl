@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------
 # YamlBlockAST
 function reparse!(ast::YamlBlockAST)
-    src = join_src(ast, "\n")
+    src = src_str(ast)
     merge!(ast.dat, YAML.load(src))
     return ast
 end
@@ -9,44 +9,54 @@ end
 # ------------------------------------------------------------------
 # HeaderLineAST
 function reparse!(ast::HeaderLineAST)
-    src = join_src(ast, "\n")
-    dat = _match_dict(HEADER_LINE_PARSER_REGEX, src)
-    ast.title = dat["title"]
-    ast.lvl = length(dat["lvl"])
+    src = src_str(ast)
+    rmatch = match(HEADER_LINE_PARSER_REGEX, src)
+    ast.title = rmatch[:title]
+    ast.lvl = length(rmatch[:lvl])
+    return ast
+end
+
+# ------------------------------------------------------------------
+# BlockLinkLineAST
+function reparse!(ast::BlockLinkLineAST)
+    src = src_str(ast)
+    rmatch = match(BLOCK_LINK_PARSER_REGEX, src)
+    ast.link = rmatch[:link]
     return ast
 end
 
 # ------------------------------------------------------------------
 # CommentBlockAST
 function reparse!(ast::CommentBlockAST)
-    src = join_src(ast, "\n")
-    dat = _match_dict(COMMENT_BLOCK_PARSER_REGEX, src)
-    ast.txt = dat["txt"]
+    src = src_str(ast)
+    rmatch = match(COMMENT_BLOCK_PARSER_REGEX, src)
+    ast.txt = rmatch[:txt]
     return ast
 end
 
 # ------------------------------------------------------------------
 # CodeBlockAST
 function reparse!(ast::CodeBlockAST)
-    src = join_src(ast, "\n")
-    dat = _match_dict(CODE_BLOCK_PARSER_REGEX, src)
-    ast.lang = dat["lang"]
-    ast.code = dat["code"]
+    src = src_str(ast)
+    rmatch = match(CODE_BLOCK_PARSER_REGEX, src)
+    ast.lang = rmatch[:lang]
+    ast.code = rmatch[:code]
     return ast
 end
 
 # ------------------------------------------------------------------
 # TextLineAST
 function reparse!(ast::TextLineAST)
-    src = join_src(ast, "\n")
+    src = src_str(ast)
     dig = src
 
     # links
-    _eachmatch_plus_range(INTERNAL_LINK_PARSE_REGEX, src) do range, rmatch
+    empty!(ast.inlinks)
+    for rmatch in eachmatch(INTERNAL_LINK_PARSE_REGEX, src)
         link_src_ = rmatch[:src]
         link_ = InternalLinkAST(
             #= parent =# ast,
-            #= pos =# range,
+            #= pos =# _match_pos(rmatch),
             #= src =# link_src_,
             #= file =# rmatch[:file],
             #= header =# haskey(rmatch, :header) ? rmatch[:header] : nothing,
@@ -55,14 +65,15 @@ function reparse!(ast::TextLineAST)
         push!(ast.inlinks, link_)
         
         # digest starting for the links (To avoid tags-like headers)
-        dig = replace(src, link_src_ => "")
+        dig = replace(dig, link_src_ => "~"^length(link_src_))
     end
 
     # tags
-    _eachmatch_plus_range(TAG_PARSE_REGEX, dig) do range, rmatch
+    empty!(ast.tags)
+    for rmatch in eachmatch(TAG_PARSE_REGEX, dig)
         tag_ = TagAST(
             #= parent =# ast,
-            #= pos =# range,
+            #= pos =# _match_pos(rmatch),
             #= src =# rmatch[:src],
             #= labels =# string.(split(rmatch[:label], "/"))
         )
@@ -72,17 +83,28 @@ function reparse!(ast::TextLineAST)
     return ast
 end
 
+
 # ------------------------------------------------------------------
 # LatexBlockAST
-function parse_latex_block(src::AbstractString)
-    dat_ = Dict{String, Any}()
-    dat_["src"] = src
-    dat_["tag"] = _match_dict(LATEX_TAG_PARSE_REGEX, src)
-    return dat_
-end
-
 function reparse!(ast::LatexBlockAST)
-    ast
+    src = src_str(ast)
+
+    # latex
+    rmatch = match(LATEX_BLOCK_PARSER_REGEX, src)
+    ast.latex = rmatch[:latex]
+
+    # tag
+    rmatch = match(LATEX_TAG_PARSE_REGEX, src)
+    if !isnothing(rmatch)
+        ast.tag = LatexTagAST(
+            #= parent =# ast,
+            #= pos =# _match_pos(rmatch),
+            #= src =# rmatch[:src],
+            #= label =# rmatch[:label]
+        )
+    end
+
+    return ast
 end
 
 # ------------------------------------------------------------------

@@ -1,0 +1,32 @@
+---
+Bla: ["Ble", "Bli", "Blu"]
+Bli: "1213-1212312-312"
+Blo: 12
+---
+
+# This is a level 1 header
+
+A line of text
+
+## This is a level 2 header
+
+%%julia
+println("Hi")
+%%
+
+$$ Inline $$
+
+$$ 
+\tag{this-is-a-tag}
+Multiline
+Multiline
+Multiline
+$$
+
+```julia
+println("Hi")
+```
+
+This is just text with a link [[file#header|alias]] [[file#header|alias]] and a #Tag.
+
+You can also link to specific headers in files. Start typing a link like you would normally. When the note you want is highlighted, press # instead of Enter and you'll see a list of headings in that file. Continue typing or navigate with arrow keys as before, press #again at each subheading you want to add, and Enter to complete the link. To make the link display different text than its real note name in Preview, use the vertical pipe (Shift+|) For example: Custom Link Name in Preview! This can be combined with linking to headers, as in Example of Folding.

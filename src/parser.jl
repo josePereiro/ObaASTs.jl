@@ -61,7 +61,8 @@ function _parse_lines(lines)
         end
 
         # ----------------------------------------------------------------
-        # header
+        # HEADER LINE
+
         rmatch = match(HEADER_LINE_REGEX, line)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             line_obj = HeaderLineAST(
@@ -70,6 +71,20 @@ function _parse_lines(lines)
                 #= src =# line,
                 #= title =# "",
                 #= lvl =# -1
+            )
+            push!(AST, line_obj)
+            continue
+        end
+
+        # ----------------------------------------------------------------
+        # BlockLinkLineAST
+        rmatch = match(BLOCK_LINK_LINE_REGEX, line)
+        if scope === GLOBAL_SCOPE && !isnothing(rmatch)
+            line_obj = BlockLinkLineAST(
+                #= parent =# AST,
+                #= line =# li,
+                #= src =# line,
+                #= link =# ""
             )
             push!(AST, line_obj)
             continue

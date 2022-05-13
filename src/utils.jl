@@ -19,12 +19,10 @@ function _match_dict(reg::Regex, str::AbstractString)
 end
 
 # ------------------------------------------------------------------
-function _eachmatch_plus_range(f::Function, reg::Regex, str::String)
-    for rm in eachmatch(reg, str)
-        i0 = rm.offset
-        i1 = i0 + length(rm.match) - 1
-        f(i0:i1, rm)
-    end
+function _match_pos(rm::RegexMatch) 
+    i0 = rm.offset
+    i1 = i0 + length(rm.match) - 1
+    return i0:i1
 end
 
 # ------------------------------------------------------------------
