@@ -15,13 +15,14 @@ const EMPTY_LINE = :EMPTY_LINE
 # This assume a per-line compatible file. Obsidian is more flexible.
 # The main restriction is that no block element is started in a midline. 
 # TODO: write error code to detect it
-function _parse_lines_p1(lines)
+function _parse_lines(lines)
 
     AST = ObaAST(Vector{AbstractObaAST}())
     scope = INIT_SCOPE
     block_obj = nothing
 
     for (li, line) in enumerate(lines)
+        line = string(line)
 
         # @info "-" line scope
 
@@ -70,7 +71,7 @@ function _parse_lines_p1(lines)
                 #= parent =# AST,
                 #= line =# li,
                 #= src =# line,
-                #= txt =# "",
+                #= title =# "",
                 #= lvl =# -1
             )
             push!(AST, line_obj)
@@ -222,7 +223,7 @@ function _parse_lines_p1(lines)
                 #= parent =# AST,
                 #= line =# li,
                 #= src =# line,
-                #= internal_links =# Vector{InternalLinkAST}(),
+                #= inlinks =# Vector{InternalLinkAST}(),
                 #= tags =# Vector{TagAST}()
             )
             push!(AST, obj)
@@ -249,57 +250,12 @@ function _parse_lines_p1(lines)
         "Parsing failed, block ", scope, " starting at line ", block_obj[:line], " unclosed!"
     )
 
-    return AST
+    return reparse!(AST)
 end
 
 # ------------------------------------------------------------------
-function _parse_dat!(ObaAST::Vector)
-
-    # Parse dat
-    for line_AST in AST
-        type = line_AST[:type]
-        src = _join_src(line_AST)
-
-        # YAML block
-        if type == YAML_BLOCK
-            line_AST[:dat] = parse_yaml(src)
-            continue
-        end
-
-        # HEAD line
-        if type == HEADER
-            line_AST[:dat] = parse_header(src)
-            continue
-        end
-
-        # COMMENTS
-        if type == COMMENT_BLOCK
-            line_AST[:dat] = parse_comment(src)
-            continue
-        end
-
-        # CODE block
-        if type == CODE_BLOCK
-            line_AST[:dat] = parse_code_block(src)
-            continue
-        end
-
-        parse_code_block
-
-        # TEXT
-        if type == TEXT_LINE
-            line_AST[:dat] = parse_text(src)
-            continue
-        end
-
-        # LATEX BLOCK
-        if type == LATEX_BLOCK
-            line_AST[:dat] = parse_latex_block(src)
-            continue
-        end
-    end
-
-    return AST
-end
-
-
+# api
+parse_lines(lines::Base.EachLine) = _parse_lines(lines)
+parse_lines(lines::Vector) = _parse_lines(lines)
+parse_file(path::AbstractString) = parse_lines(eachline(path))
+parse_string(src::AbstractString) = parse_lines(split(src))

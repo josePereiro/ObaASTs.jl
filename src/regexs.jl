@@ -2,7 +2,7 @@
 # Extract Regex
 # To extract from a src text (possible several lines)
 const TAG_PARSE_REGEX                 = r"(?<src>\#(?<label>[A-Za-z_][A-Za-z0-9_/]*))"
-const FILE_LINK_PARSE_REGEX           = r"(?<src>\[\[(?<file>[^\|\#\n]*?)(?:\#(?<label>[^\|\n]*?))?(?:\|(?<alias>[^\n]*?))?\]\])"
+const INTERNAL_LINK_PARSE_REGEX       = r"(?<src>\[\[(?<file>[^\|\#\n]*?)(?:\#(?<header>[^\|\n]*?))?(?:\|(?<alias>[^\n]*?))?\]\])"
 const LATEX_TAG_PARSE_REGEX           = r"(?<src>\\tag\{(?<label>\N+)\})"
 const HEADER_LINE_PARSER_REGEX        = r"(?<src>(?<lvl>\#+)\h+(?<title>.*))"
 const COMMENT_BLOCK_PARSER_REGEX      = r"(?<src>\h*\%{2}(?<txt>(?:.*\n?)*)\%{2}\h*)"
