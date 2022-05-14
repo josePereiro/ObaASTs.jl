@@ -278,7 +278,7 @@ AST[5].src = "# Now a header, not a simple text line"
 reparse!(AST[5])
 # TextLineAST "# Now a header, not a simple text line" <------ (NOTE: this is wrong! It shouldn't be a TextLineAST)
 
-julia> reparse!(AST)
+reparse!(AST)
 # ObaAST with 21 child(s)
 # child(s):
 # [1] YamlBlockAST "---\nBla: [\"Ble\", \"Bli\", \"Blu\"]\nBli: \"1213-1212312-312\"\nBlo: 12\n---"
