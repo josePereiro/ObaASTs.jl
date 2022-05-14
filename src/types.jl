@@ -2,30 +2,31 @@
 ## ------------------------------------------------------------------
 # Abstracts
 abstract type AbstractObaAST end
-abstract type AbstractObaASTBlock <: AbstractObaAST end
-abstract type AbstractObaASTLine <: AbstractObaAST end
+abstract type AbstractObaASTChild <: AbstractObaAST end
 abstract type AbstractObaASTObj <: AbstractObaAST end
 
 function Base.show(io::IO, ast:: AbstractObaAST)
-    print(io, nameof(typeof(ast)), " \"", _preview(io, join_src(ast, "\\n")), "\"")
+    print(io, nameof(typeof(ast)), " \"", _preview(io, source(ast, "\\n")), "\"")
 end
 
 
 ## ------------------------------------------------------------------
 # ObaAST
-struct ObaAST
-    childs::Vector{AbstractObaAST}
+mutable struct ObaAST
+    file::Union{String, Nothing}
+    childs::Vector{AbstractObaASTChild}
 end
 
 Base.length(ast::ObaAST) = length(ast.childs)
-Base.size(ast::ObaAST) = size(ast.childs)
+Base.size(ast::ObaAST, args...) = size(ast.childs, args...)
 Base.getindex(ast::ObaAST, key) = getindex(ast.childs, key)
-Base.setindex!(ast::ObaAST, obj::AbstractObaAST, key) = setindex!(ast.childs, obj, key)
+Base.setindex!(ast::ObaAST, obj::AbstractObaASTChild, key) = setindex!(ast.childs, obj, key)
 Base.iterate(ast::ObaAST) = iterate(ast.childs)
 Base.iterate(ast::ObaAST, state) = iterate(ast.childs, state)
-Base.push!(ast::ObaAST, obj::AbstractObaAST) = push!(ast.childs, obj)
+Base.push!(ast::ObaAST, obj::AbstractObaASTChild) = push!(ast.childs, obj)
 Base.firstindex(ast::ObaAST) = firstindex(ast.childs)
 Base.lastindex(ast::ObaAST) = lastindex(ast.childs)
+Base.pairs(ast::ObaAST) = pairs(ast.childs)
 
 function Base.show(io::IO, ast::ObaAST)
 
@@ -48,104 +49,125 @@ end
 
 ## ------------------------------------------------------------------
 # InternalLinkAST
-mutable struct InternalLinkAST <: AbstractObaASTObj
-    parent::AbstractObaASTLine
-    pos::UnitRange{Int64}
+struct InternalLinkAST <: AbstractObaASTObj
+    # source meta
+    parent::AbstractObaASTChild
     src::String
-    file::String
+    pos::UnitRange{Int}
+    # parsed
+    file::Union{String, Nothing}
     header::Union{String, Nothing}
     alias::Union{String, Nothing}
 end
 
 ## ------------------------------------------------------------------
 # TagAST
-mutable struct TagAST <: AbstractObaASTObj
-    parent::AbstractObaASTLine
-    pos::UnitRange{Int64}
+struct TagAST <: AbstractObaASTObj
+    # source meta
+    parent::AbstractObaASTChild
     src::String
-    labels::Vector{String}
-end
-
-## ------------------------------------------------------------------
-# BlockLinkLineAST
-mutable struct BlockLinkLineAST <: AbstractObaASTObj
-    parent::ObaAST
-    line::Int
-    src::String
-    link::String
+    pos::UnitRange{Int}
+    # parsed
+    label::String
 end
 
 ## ------------------------------------------------------------------
 # TextLineAST
-mutable struct TextLineAST <: AbstractObaASTLine
+mutable struct TextLineAST <: AbstractObaASTChild
+    # source meta
     parent::ObaAST
-    line::Int
     src::String
+    line::Int
+    # parsed
     inlinks::Vector{InternalLinkAST}
     tags::Vector{TagAST}
 end
 
 ## ------------------------------------------------------------------
-# EmptyLineAST
-mutable struct EmptyLineAST <: AbstractObaASTLine
+# BlockLinkLineAST
+mutable struct BlockLinkLineAST <: AbstractObaASTChild
+    # source meta
     parent::ObaAST
-    line::Int
     src::String
+    line::Int
+    # parsed
+    link::String
+end
+
+## ------------------------------------------------------------------
+# EmptyLineAST
+mutable struct EmptyLineAST <: AbstractObaASTChild
+    # source meta
+    parent::ObaAST
+    src::String
+    line::Int
 end
 
 ## ------------------------------------------------------------------
 # HeaderLineAST
-mutable struct HeaderLineAST <: AbstractObaASTLine
+mutable struct HeaderLineAST <: AbstractObaASTChild
+    # source meta
     parent::ObaAST
-    line::Int
     src::String
+    line::Int
+    # parsed
     title::String
     lvl::Int
 end
 
 ## ------------------------------------------------------------------
 # CommentBlockAST
-mutable struct CommentBlockAST <: AbstractObaASTBlock
+mutable struct CommentBlockAST <: AbstractObaASTChild
+    # source meta
     parent::ObaAST
+    src::String
     line::Int
-    src::Vector{String}
-    txt::String
+    # parsed
+    body::String
 end
 
 ## ------------------------------------------------------------------
 # LatexTagAST
-mutable struct LatexTagAST <: AbstractObaASTObj
-    parent::AbstractObaASTBlock
-    pos::UnitRange{Int64}
+struct LatexTagAST <: AbstractObaASTObj
+    # source meta
+    parent::AbstractObaASTChild
     src::String
+    pos::UnitRange{Int}
+    # parsed
     label::String
 end
 
 ## ------------------------------------------------------------------
 # LatexBlockAST
-mutable struct LatexBlockAST <: AbstractObaASTBlock
+mutable struct LatexBlockAST <: AbstractObaASTChild
+    # source meta
     parent::ObaAST
+    src::String
     line::Int
-    src::Vector{String}
-    latex::String
+    # parsed
+    body::String
     tag::Union{LatexTagAST, Nothing}
 end
 
 ## ------------------------------------------------------------------
 # CodeBlockAST
-mutable struct CodeBlockAST <: AbstractObaASTBlock
+mutable struct CodeBlockAST <: AbstractObaASTChild
+    # source meta
     parent::ObaAST
+    src::String
     line::Int
-    src::Vector{String}
-    lang::Union{String, Nothing}
-    code::String
+    # parsed
+    lang::String
+    body::String
 end
 
 ## ------------------------------------------------------------------
 # YamlBlockAST
-mutable struct YamlBlockAST <: AbstractObaASTBlock
+mutable struct YamlBlockAST <: AbstractObaASTChild
+    # source meta
     parent::ObaAST
+    src::String
     line::Int
-    src::Vector{String}
-    dat::Dict{String, Any}
+    # parsed
+    dict::Dict{String, Any}
 end

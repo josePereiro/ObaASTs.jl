@@ -9,14 +9,15 @@ const LATEX_BLOCK = :LATEX_BLOCK
 const CODE_BLOCK = :CODE_BLOCK
 
 # ------------------------------------------------------------------
-# This assume a per-line compatible file. Obsidian is more flexible.
-# The main restriction is that no block element is started in a midline. 
-# TODO: write error code to detect it
 function _parse_lines(lines)
 
-    AST = ObaAST(Vector{AbstractObaAST}())
+    AST = ObaAST(nothing, Vector{AbstractObaAST}())
     scope = INIT_SCOPE
     block_obj = nothing
+    lines_buff = nothing
+
+    # ----------------------------------------------------------------
+    # source part
 
     for (li, line) in enumerate(lines)
         line = string(line)
@@ -27,29 +28,30 @@ function _parse_lines(lines)
         # yaml section start
         rmatch = match(YAML_BLOCK_START_LINE_REGEX, line)
         if scope === INIT_SCOPE && !isnothing(rmatch)
-            # @info "At YAML_BLOCK_START_LINE_REGEX"
             block_obj = YamlBlockAST(
                 #= parent =# AST, 
+                #= src =# "", 
                 #= line =# li, 
-                #= src =# [line], 
-                #= dat =# Dict{String, Any}()
+                #= dict =# Dict{String, Any}()
             )
 
             push!(AST, block_obj)
+            lines_buff = String[line]
             scope = YAML_BLOCK
             continue
         end
 
         # yaml section content/end
         if scope === YAML_BLOCK
-            push!(block_obj.src, line)
+            push!(lines_buff, line)
             rmatch = match(YAML_BLOCK_END_LINE_REGEX, line)
             if !isnothing(rmatch)
-                # @info "At YAML_BLOCK_END_LINE_REGEX"
+                # exit block
                 scope = GLOBAL_SCOPE
+                block_obj.src = join(lines_buff, "\n")
                 block_obj = nothing
+                lines_buff = nothing
             end
-            # @info "At YAML_BLOCK"
             continue
         end
 
@@ -67,10 +69,10 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             line_obj = HeaderLineAST(
                 #= parent =# AST,
-                #= line =# li,
                 #= src =# line,
+                #= line =# li,
                 #= title =# "",
-                #= lvl =# -1
+                #= lvl =# 0
             )
             push!(AST, line_obj)
             continue
@@ -82,8 +84,8 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             line_obj = BlockLinkLineAST(
                 #= parent =# AST,
-                #= line =# li,
                 #= src =# line,
+                #= line =# li,
                 #= link =# ""
             )
             push!(AST, line_obj)
@@ -99,9 +101,9 @@ function _parse_lines(lines)
 
             obj = CommentBlockAST(
                 #= parent =# AST,
+                #= src =# line,
                 #= line =# li,
-                #= src =# [line],
-                #= txt =# ""
+                #= body =# ""
             )
             push!(AST, obj)
             continue
@@ -112,25 +114,28 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             block_obj = CommentBlockAST(
                 #= parent =# AST,
+                #= src =# "",
                 #= line =# li,
-                #= src =# [line],
-                #= txt =# ""
+                #= body =# ""
             )
             # enter block
             push!(AST, block_obj)
+            lines_buff = String[line]
             scope = COMMENT_BLOCK
             continue
         end
 
         # comment block section content/end
         if scope === COMMENT_BLOCK
-            push!(block_obj.src, line)
+            push!(lines_buff, line)
             rmatch = match(COMMENT_BLOCK_END_LINE_REGEX, line)
             
             if !isnothing(rmatch)
                 # exit block
                 scope = GLOBAL_SCOPE
+                block_obj.src = join(lines_buff, "\n")
                 block_obj = nothing
+                lines_buff = nothing
             end
             continue
         end
@@ -143,9 +148,9 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             obj = LatexBlockAST(
                 #= parent =# AST,
+                #= src =# line,
                 #= line =# li,
-                #= src =# [line],
-                #= txt =# "",
+                #= body =# "",
                 #= tag =# nothing
             )
             push!(AST, obj)
@@ -157,26 +162,29 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             block_obj = LatexBlockAST(
                 #= parent =# AST,
+                #= src =# "",
                 #= line =# li,
-                #= src =# [line],
                 #= txt =# "",
                 #= tag =# nothing
             )
 
             # enter block
             push!(AST, block_obj)
+            lines_buff = String[line]
             scope = LATEX_BLOCK
             continue
         end
 
         # latex block section content/end
         if scope === LATEX_BLOCK
-            push!(block_obj.src, line)
+            push!(lines_buff, line)
             rmatch = match(LATEX_BLOCK_END_LINE_REGEX, line)
             if !isnothing(rmatch)
                 # exit block
                 scope = GLOBAL_SCOPE
+                block_obj.src = join(lines_buff, "\n")
                 block_obj = nothing
+                lines_buff = nothing
             end
             continue
         end
@@ -189,10 +197,10 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             obj = CodeBlockAST(
                 #= parent =# AST, 
+                #= src =# line, 
                 #= line =# li, 
-                #= src =# [line], 
-                #= lang =# nothing, 
-                #= code =#  "" 
+                #= lang =# "", 
+                #= body =#  "" 
             )
             push!(AST, obj)
             continue
@@ -203,26 +211,29 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             block_obj = CodeBlockAST(
                 #= parent =# AST, 
+                #= src =# "", 
                 #= line =# li, 
-                #= src =# [line], 
-                #= lang =# nothing, 
-                #= code =#  "" 
+                #= lang =# "", 
+                #= body =#  "" 
             )
 
             # enter block
             push!(AST, block_obj)
+            lines_buff = String[line]
             scope = CODE_BLOCK
             continue
         end
 
         # code block section content/end
         if scope === CODE_BLOCK
-            push!(block_obj.src, line)
+            push!(lines_buff, line)
             rmatch = match(CODE_BLOCK_END_LINE_REGEX, line)
             if !isnothing(rmatch)
                 # exit block
                 scope = GLOBAL_SCOPE
+                block_obj.src = join(lines_buff, "\n")
                 block_obj = nothing
+                lines_buff = nothing
             end
             continue
         end
@@ -233,8 +244,8 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && isnothing(rmatch)
             obj = TextLineAST(
                 #= parent =# AST,
-                #= line =# li,
                 #= src =# line,
+                #= line =# li,
                 #= inlinks =# Vector{InternalLinkAST}(),
                 #= tags =# Vector{TagAST}()
             )
@@ -248,8 +259,8 @@ function _parse_lines(lines)
         if scope === GLOBAL_SCOPE && !isnothing(rmatch)
             obj = EmptyLineAST(
                 #= parent =# AST,
-                #= line =# li,
-                #= src =# line
+                #= src =# line,
+                #= line =# li
             )
             push!(AST, obj)
             continue
@@ -259,15 +270,13 @@ function _parse_lines(lines)
 
     # Check closing objects
     scope !== GLOBAL_SCOPE && !isnothing(block_obj) && error(
-        "Parsing failed, block ", scope, " starting at line ", block_obj[:line], " unclosed!"
+        "Parsing failed, block ", scope, " starting at line ", block_obj.line, " unclosed!"
     )
+    
+    # ----------------------------------------------------------------
+    # parsed part
+    foreach(reparse!, AST)
 
-    return reparse!(AST)
+    return AST
 end
 
-# ------------------------------------------------------------------
-# api
-parse_lines(lines::Base.EachLine) = _parse_lines(lines)
-parse_lines(lines::Vector) = _parse_lines(lines)
-parse_file(path::AbstractString) = parse_lines(eachline(path))
-parse_string(src::AbstractString) = parse_lines(split(src))
