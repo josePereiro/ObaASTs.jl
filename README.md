@@ -8,6 +8,8 @@ The main restriction is that all 'children' elements must be defined within line
 
 > **Note**: This same document is fully parsable.
 
+> **Note**: At the time of writing, the parser is working with all the notes (> 500) in my vault with `Obsidian v0.14.6`
+
 --- 
 ### Children
 #### Command block
