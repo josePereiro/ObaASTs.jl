@@ -268,6 +268,32 @@ AST[3].lvl
 
 > **WARNING:** `reparse!` over a child will try to parse the new src conserving the type. It might fail, either loudly or quietly. To get a real re-parsing, `reparse!` the whole `ObaAST`. It will redo all the child's from scratch.
 
+```julia
+AST[5]
+# TextLineAST "A line of text"
+
+AST[5].src = "# Now a header, not a simple text line"
+# "# Now a header, not a simple text line"
+
+reparse!(AST[5])
+# TextLineAST "# Now a header, not a simple text line" <------ (NOTE: this is wrong! It shouldn't be a TextLineAST)
+
+julia> reparse!(AST)
+# ObaAST with 21 child(s)
+# child(s):
+# [1] YamlBlockAST "---\nBla: [\"Ble\", \"Bli\", \"Blu\"]\nBli: \"1213-1212312-312\"\nBlo: 12\n---"
+# [3] HeaderLineAST "### Now you are level 3"
+# [5] HeaderLineAST "# Now a header, not a simple text line" <------ (NOTE: Now is ok)
+# [7] HeaderLineAST "## This is a level 2 header"
+# [9] CommentBlockAST "%%julia\nprintln(\"Hi\")\n%%"
+# [11] LatexBlockAST "$$ Inline $$"
+# [13] LatexBlockAST "$$ \n\\tag{this-is-a-tag}\nMultiline\nMultiline\nMultiline\n$$"
+# [15] CodeBlockAST "```julia\nprintln(\"Hi\")\n```"
+# [17] TextLineAST "This is just text with a link [[file#header|alias]] [[file#header|alias]] and a #Tag."
+# [19] TextLineAST "You can also link to specific headers in files\. Start typing a link like you would normally\. When the note you want is h"
+# [...]
+```
+
 ### source
 The function `source` will return the `src` field in each child object and the correct combination of them for the full `ObaAST`. It can be used to create a new document after modification and `reparse!`.
 
