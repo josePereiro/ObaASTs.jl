@@ -204,7 +204,7 @@ Text line
 ^blockid
 ```
 
-**Allowed**
+**Not Allowed**
 ```txt
 Text line ^blockid
 ```
