@@ -7,7 +7,7 @@ export ObaAST, InternalLinkAST, TagAST, TextLineAST, EmptyLineAST, HeaderLineAST
 export CommentBlockAST, LatexTagAST, LatexBlockAST, CodeBlockAST, YamlBlockAST
 export parse_lines, parse_file, parse_string
 export reparse!, resource!
-export source, is_emptyline
+export parent_ast, source, is_emptyline
 
 include("types.jl")
 include("api.jl")
