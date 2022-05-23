@@ -9,10 +9,9 @@ function _parse_yaml_line!(parser::LineParser, line, li)
         parser.block_obj = YamlBlockAST(
             #= parent =# parser.AST, 
             #= src =# "", 
-            #= line =# li, 
-            #= dict =# Dict{String, Any}()
+            #= line =# li
         )
-
+        # enter block
         push!(parser.AST, parser.block_obj)
         parser.lines_buff = String[line]
         parser.scope = YAML_BLOCK

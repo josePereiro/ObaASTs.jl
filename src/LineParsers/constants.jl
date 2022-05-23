@@ -11,7 +11,7 @@ const COMMENT_BLOCK_INLINE_REGEX         = r"\A\h*\%{2}(?:(?!\%{2}).)*\%{2}\h*\Z
 const COMMENT_BLOCK_START_LINE_REGEX     = r"\A\h*\%{2}(?:(?!\%{2}).)*\Z"
 const COMMENT_BLOCK_END_LINE_REGEX       = r"\A\h*(?:(?!\%{2}).)*\%{2}\h*\Z"
 
-const OBA_SCRIPT_BLOCK_START_LINE_REGEX  = r"\A\h*\%{2}\h*\#\!Oba[\w\-]*\Z"
+const OBA_SCRIPT_BLOCK_START_LINE_REGEX  = r"\A\h*\%{2}\h*\#\!Oba[\h\=\w\-]*\Z"
 const OBA_SCRIPT_BLOCK_END_LINE_REGEX    = r"\A\h*(?:(?!\%{2}).)*\%{2}\h*\Z"
 
 const CODE_BLOCK_INLINE_REGEX            = r"\A\h*`{3}(?:(?!`{3}).)*`{3}\h*\Z"

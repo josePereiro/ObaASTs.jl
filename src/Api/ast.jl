@@ -41,6 +41,9 @@ end
 parent_ast(ast::AbstractObaAST) = ast.parent
 parent_ast(ast::ObaAST) = ast
 
+parsed_dict(ast::AbstractObaASTChild) = ast.parsed
+parsed_dict(ast::AbstractObaASTObj) = ast.parsed
+
 # ------------------------------------------------------------------
 istextline(::AbstractObaAST) = false
 istextline(::TextLineAST) = true

@@ -8,9 +8,7 @@ function _parse_text_line!(parser::LineParser, line, li)
         obj = TextLineAST(
             #= parent =# parser.AST,
             #= src =# line,
-            #= line =# li,
-            #= inlinks =# Vector{InternalLinkAST}(),
-            #= tags =# Vector{TagAST}()
+            #= line =# li
         )
         push!(parser.AST, obj)
         return true

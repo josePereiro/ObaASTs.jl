@@ -49,3 +49,9 @@ function Base.show(io::IO, ast::AbstractObaAST)
 end
 
 Base.filter(fun::Function, ast::ObaAST) = ObaAST(ast.file, filter(fun, ast.children))
+
+Base.get(ast::AbstractObaASTChild, key::Symbol, dflt=nothing) = get(ast.parsed, key, dflt)
+Base.get(ast::AbstractObaASTObj, key::Symbol, dflt=nothing) = get(ast.parsed, key, dflt)
+
+Base.keys(ast::AbstractObaASTChild) = keys(ast.parsed)
+Base.keys(ast::AbstractObaASTObj) = keys(ast.parsed)

@@ -9,10 +9,7 @@ function _parse_oba_script_line!(parser::LineParser, line, li)
         parser.block_obj = ObaScriptBlockAST(
             #= parent =# parser.AST,
             #= src =# "",
-            #= line =# li,
-            #= body =# "",
-            #= head =# "",
-            #= script =# ""
+            #= line =# li
         )
         # enter block
         push!(parser.AST, parser.block_obj)

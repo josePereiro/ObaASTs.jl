@@ -9,9 +9,7 @@ function _parse_code_block_line!(parser::LineParser, line, li)
         obj = CodeBlockAST(
             #= parent =# parser.AST, 
             #= src =# line, 
-            #= line =# li, 
-            #= lang =# "", 
-            #= body =#  "" 
+            #= line =# li
         )
         push!(parser.AST, obj)
         
@@ -24,9 +22,7 @@ function _parse_code_block_line!(parser::LineParser, line, li)
         parser.block_obj = CodeBlockAST(
             #= parent =# parser.AST, 
             #= src =# "", 
-            #= line =# li, 
-            #= lang =# "", 
-            #= body =#  "" 
+            #= line =# li
         )
 
         # enter block

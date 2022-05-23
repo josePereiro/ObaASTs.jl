@@ -7,8 +7,7 @@ function _parse_block_link_line!(parser::LineParser, line, li)
         line_obj = BlockLinkLineAST(
             #= parent =# parser.AST,
             #= src =# line,
-            #= line =# li,
-            #= link =# ""
+            #= line =# li
         )
         push!(parser.AST, line_obj)
         return true

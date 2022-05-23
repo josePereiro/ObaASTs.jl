@@ -8,9 +8,7 @@ function _parse_header_line!(parser::LineParser, line, li)
         line_obj = HeaderLineAST(
             #= parent =# parser.AST,
             #= src =# line,
-            #= line =# li,
-            #= title =# "",
-            #= lvl =# 0
+            #= line =# li
         )
         push!(parser.AST, line_obj)
         return true

@@ -15,7 +15,7 @@ const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>\h*\%{2}\h*(?<head>\#\!Oba\N*)\
 # YamlBlockAST
 function reparse!(ast::YamlBlockAST)
     src = ast.src
-    merge!(ast.dict, YAML.load(src))
+    ast.parsed[:yaml] = YAML.load(src)
     return ast
 end
 
@@ -24,8 +24,8 @@ end
 function reparse!(ast::HeaderLineAST)
     src = ast.src
     rmatch = match(HEADER_LINE_PARSER_REGEX, src)
-    ast.title = _get_match(rmatch, :title)
-    ast.lvl = length(_get_match(rmatch, :lvl))
+    ast.parsed[:title] = _get_match(rmatch, :title)
+    ast.parsed[:lvl] = length(_get_match(rmatch, :lvl))
     return ast
 end
 
@@ -34,7 +34,7 @@ end
 function reparse!(ast::BlockLinkLineAST)
     src = ast.src
     rmatch = match(BLOCK_LINK_PARSER_REGEX, src)
-    ast.link = _get_match(rmatch, :link)
+    ast.parsed[:link] = _get_match(rmatch, :link)
     return ast
 end
 
@@ -43,7 +43,7 @@ end
 function reparse!(ast::CommentBlockAST)
     src = ast.src
     rmatch = match(COMMENT_BLOCK_PARSER_REGEX, src)
-    ast.body = _get_match(rmatch, :body)
+    ast.parsed[:body] = _get_match(rmatch, :body)
     return ast
 end
 
@@ -52,9 +52,9 @@ end
 function reparse!(ast::ObaScriptBlockAST)
     src = ast.src
     rmatch = match(OBA_SCRIPT_BLOCK_PARSER_REGEX, src)
-    ast.body = _get_match(rmatch, :body)
-    ast.head = _get_match(rmatch, :head)
-    ast.script = _get_match(rmatch, :script)
+    ast.parsed[:body] = _get_match(rmatch, :body)
+    ast.parsed[:head] = _get_match(rmatch, :head)
+    ast.parsed[:script] = _get_match(rmatch, :script)
     return ast
 end
 
@@ -63,8 +63,8 @@ end
 function reparse!(ast::CodeBlockAST)
     src = ast.src
     rmatch = match(CODE_BLOCK_PARSER_REGEX, src)
-    ast.lang = _get_match(rmatch, :lang, "")
-    ast.body = _get_match(rmatch, :body)
+    ast.parsed[:lang] = _get_match(rmatch, :lang, "")
+    ast.parsed[:body] = _get_match(rmatch, :body)
     return ast
 end
 
@@ -75,18 +75,18 @@ function reparse!(ast::TextLineAST)
     dig = src # digest
 
     # links
-    empty!(ast.inlinks)
+    ast.parsed[:inlinks] = InternalLinkAST[]
     for rmatch in eachmatch(INTERNAL_LINK_PARSE_REGEX, src)
         link_src_ = _get_match(rmatch, :src)
-        link_ = InternalLinkAST(
+        link_ast = InternalLinkAST(
             #= parent =# ast,
             #= src =# link_src_,
-            #= pos =# _match_pos(rmatch),
-            #= file =# _get_match(rmatch, :file, nothing),
-            #= header =# _get_match(rmatch, :header, nothing),
-            #= alias =# _get_match(rmatch, :alias, nothing)
+            #= pos =# _match_pos(rmatch)
         )
-        push!(ast.inlinks, link_)
+        link_ast.parsed[:file] = _get_match(rmatch, :file, nothing)
+        link_ast.parsed[:header] = _get_match(rmatch, :header, nothing)
+        link_ast.parsed[:alias] = _get_match(rmatch, :alias, nothing)
+        push!(ast.parsed[:inlinks], link_ast)
         
         # digest starting for the links (To avoid tags-like headers)
         # (On duplicated links) This works because the links are searched in `src` not in `dig`.
@@ -94,15 +94,15 @@ function reparse!(ast::TextLineAST)
     end
 
     # tags
-    empty!(ast.tags)
+    ast.parsed[:tags] = TagAST[]
     for rmatch in eachmatch(TAG_PARSE_REGEX, dig)
-        tag_ = TagAST(
+        tag_ast = TagAST(
             #= parent =# ast,
             #= src =# _get_match(rmatch, :src),
-            #= pos =# _match_pos(rmatch),
-            #= label =# _get_match(rmatch, :label)
+            #= pos =# _match_pos(rmatch)
         )
-        push!(ast.tags, tag_)
+        tag_ast.parsed[:label] = _get_match(rmatch, :label)
+        push!(ast.parsed[:tags], tag_ast)
     end
 
     # TODO: extract inline latexs
@@ -121,17 +121,18 @@ function reparse!(ast::LatexBlockAST)
 
     # latex
     rmatch = match(LATEX_BLOCK_PARSER_REGEX, src)
-    ast.body = _get_match(rmatch, :body)
+    ast.parsed[:body] = _get_match(rmatch, :body)
 
     # tag
     rmatch = match(LATEX_TAG_PARSE_REGEX, src)
     if !isnothing(rmatch)
-        ast.tag = LatexTagAST(
+        tag_ast = LatexTagAST(
             #= parent =# ast,
             #= src =# _get_match(rmatch, :src),
-            #= pos =# _match_pos(rmatch),
-            #= label =# _get_match(rmatch, :label)
+            #= pos =# _match_pos(rmatch)
         )
+        tag_ast.parsed[:label] = _get_match(rmatch, :label)
+        ast.parsed[:tag] = tag_ast
     end
 
     return ast

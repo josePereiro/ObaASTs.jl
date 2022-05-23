@@ -10,8 +10,7 @@ function _parse_comment_block_line!(parser::LineParser, line, li)
         obj = CommentBlockAST(
             #= parent =# parser.AST,
             #= src =# line,
-            #= line =# li,
-            #= body =# ""
+            #= line =# li
         )
         push!(parser.AST, obj)
         return true
@@ -23,8 +22,7 @@ function _parse_comment_block_line!(parser::LineParser, line, li)
         parser.block_obj = CommentBlockAST(
             #= parent =# parser.AST,
             #= src =# "",
-            #= line =# li,
-            #= body =# ""
+            #= line =# li
         )
         # enter block
         push!(parser.AST, parser.block_obj)

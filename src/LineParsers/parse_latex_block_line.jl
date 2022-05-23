@@ -9,9 +9,7 @@ function _parse_latex_block_line!(parser::LineParser, line, li)
         obj = LatexBlockAST(
             #= parent =# parser.AST,
             #= src =# line,
-            #= line =# li,
-            #= body =# "",
-            #= tag =# nothing
+            #= line =# li
         )
         push!(parser.AST, obj)
         
@@ -24,9 +22,7 @@ function _parse_latex_block_line!(parser::LineParser, line, li)
         parser.block_obj = LatexBlockAST(
             #= parent =# parser.AST,
             #= src =# "",
-            #= line =# li,
-            #= txt =# "",
-            #= tag =# nothing
+            #= line =# li
         )
 
         # enter block
