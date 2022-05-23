@@ -53,8 +53,46 @@ function reparse!(ast::ObaScriptBlockAST)
     src = ast.src
     rmatch = match(OBA_SCRIPT_BLOCK_PARSER_REGEX, src)
     ast.parsed[:body] = _get_match(rmatch, :body)
-    ast.parsed[:head] = _get_match(rmatch, :head)
     ast.parsed[:script] = _get_match(rmatch, :script)
+    
+    # head
+    head_src = _get_match(rmatch, :head)
+    dig = head_src
+    head_ast = ObaScriptHeadAST(
+        #= parent =# ast,
+        #= src =# head_src,
+        #= pos =# findfirst(head_src, src)
+    )
+    # long flags
+    for rmatch in eachmatch(OBA_SCRIPT_HEAD_LONG_FLAG_REGEX, head_src)
+        get!(head_ast.parsed, :longflags) do  
+            Dict{String, Union{Nothing, String}}()
+        end
+        flag_src = _get_match(rmatch, :src)
+        fkey = _get_match(rmatch, :key)
+        fvalue = _get_match(rmatch, :value)
+        head_ast.parsed[:longflags][fkey] = fvalue
+
+        # digest
+        dig = replace(dig, flag_src => "")
+    end
+    # short flags
+    for rmatch in eachmatch(OBA_SCRIPT_HEAD_SHORT_FLAG_REGEX, dig)
+        get!(head_ast.parsed, :shortflags, "")
+        
+        flag_src = _get_match(rmatch, :src)
+        flags = _get_match(rmatch, :flags)
+        head_ast.parsed[:shortflags] = string(head_ast.parsed[:shortflags], flags)
+
+        # digest
+        dig = replace(dig, flag_src => "")
+    end
+
+    # check diggest
+    strip(dig) == "#!Oba" || error("The script head is not well structured. ObaScriptBlockAST at line: ", ast.line, ". Digest: ", dig)
+
+    ast.parsed[:head] = head_ast
+    
     return ast
 end
 
@@ -75,8 +113,11 @@ function reparse!(ast::TextLineAST)
     dig = src # digest
 
     # links
-    ast.parsed[:inlinks] = InternalLinkAST[]
     for rmatch in eachmatch(INTERNAL_LINK_PARSE_REGEX, src)
+        get!(ast.parsed, :inlinks) do
+            InternalLinkAST[]
+        end
+
         link_src_ = _get_match(rmatch, :src)
         link_ast = InternalLinkAST(
             #= parent =# ast,
@@ -94,8 +135,10 @@ function reparse!(ast::TextLineAST)
     end
 
     # tags
-    ast.parsed[:tags] = TagAST[]
     for rmatch in eachmatch(TAG_PARSE_REGEX, dig)
+        get!(ast.parsed, :tags) do
+            TagAST[]
+        end
         tag_ast = TagAST(
             #= parent =# ast,
             #= src =# _get_match(rmatch, :src),

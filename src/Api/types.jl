@@ -92,4 +92,5 @@ end
 @ObaASTObj InternalLinkAST
 @ObaASTObj TagAST
 @ObaASTObj LatexTagAST
+@ObaASTObj ObaScriptHeadAST
 
