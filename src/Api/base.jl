@@ -23,6 +23,7 @@ Base.push!(ast::ObaAST, obj::AbstractObaASTChild) = push!(ast.children, obj)
 Base.firstindex(ast::ObaAST) = firstindex(ast.children)
 Base.lastindex(ast::ObaAST) = lastindex(ast.children)
 Base.pairs(ast::ObaAST) = pairs(ast.children)
+Base.collect(ast::ObaAST) = collect(ast.children)
 
 function Base.show(io::IO, ast::ObaAST)
 
