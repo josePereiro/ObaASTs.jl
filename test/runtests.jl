@@ -1,13 +1,14 @@
 using ObaASTs
 using Test
 
+## ------------------------------------------------------------------
 @testset "ObaASTs.jl" begin
 
     # test file
     fn = joinpath(@__DIR__, "test_file.txt")
     # keep this sync with file
     file_content_types = [
-        YamlBlockAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, CommentBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, CodeBlockAST, EmptyLineAST, TextLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, BlockLinkLineAST
+        YamlBlockAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, CommentBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, CodeBlockAST, EmptyLineAST, TextLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, BlockLinkLineAST
     ]
     
     global AST = parse_file(fn)
@@ -30,7 +31,7 @@ using Test
     AST0 = deepcopy(AST)
     reparse!(AST0)
     for (ch, ch0) in zip(AST, AST0)
-        @test typeof(ch) == typeof(ch0)
+        @test typeof(ch) === typeof(ch0)
         @test ch.line == ch.line
         @test ch.src == ch.src
     end

@@ -1,3 +1,16 @@
+## ------------------------------------------------------------------
+# Extract Regex
+# To extract from a src text (possible several lines)
+const TAG_PARSE_REGEX                 = r"(?<src>\#(?<label>[A-Za-z_][A-Za-z0-9_/]*))"
+const INTERNAL_LINK_PARSE_REGEX       = r"(?<src>\[\[(?<file>[^\|\#\n]*?)(?:\#(?<header>[^\|\n]*?))?(?:\|(?<alias>[^\n]*?))?\]\])"
+const HEADER_LINE_PARSER_REGEX        = r"(?<src>(?<lvl>\#+)\h+(?<title>.*))"
+const CODE_BLOCK_PARSER_REGEX         = r"(?<src>`{3}\h*(?<lang>\N*)\n(?<body>(?:\n?\N*)*)\n`{3}\h*)"
+const COMMENT_BLOCK_PARSER_REGEX      = r"(?<src>\h*\%{2}(?<body>(?:.*\n?)*)\%{2}\h*)"
+const LATEX_BLOCK_PARSER_REGEX        = r"(?<src>\h*\${2}(?<body>(?:.*\n?)*)\${2}\h*)"
+const LATEX_TAG_PARSE_REGEX           = r"(?<src>\\tag\{(?<label>\N+)\})"
+const BLOCK_LINK_PARSER_REGEX         = r"(?<src>\^(?<link>[\-a-zA-Z0-9]+)\h*)\Z"
+const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>\h*\%{2}\h*(?<head>\#\!Oba\N*)\n(?<body>(?:```\N*\n)?(?<script>(?:.*\n?)*?)(?:```\h*\n)?)\%{2}\h*)"
+
 # ------------------------------------------------------------------
 # YamlBlockAST
 function reparse!(ast::YamlBlockAST)
@@ -31,6 +44,17 @@ function reparse!(ast::CommentBlockAST)
     src = ast.src
     rmatch = match(COMMENT_BLOCK_PARSER_REGEX, src)
     ast.body = _get_match(rmatch, :body)
+    return ast
+end
+
+# ------------------------------------------------------------------
+# ObaScriptBlockAST
+function reparse!(ast::ObaScriptBlockAST)
+    src = ast.src
+    rmatch = match(OBA_SCRIPT_BLOCK_PARSER_REGEX, src)
+    ast.body = _get_match(rmatch, :body)
+    ast.head = _get_match(rmatch, :head)
+    ast.script = _get_match(rmatch, :script)
     return ast
 end
 
@@ -81,9 +105,9 @@ function reparse!(ast::TextLineAST)
         push!(ast.tags, tag_)
     end
 
-    # TODO: inline latexs
+    # TODO: extract inline latexs
     
-    # TODO: external links
+    # TODO: extract external links
 
     
     return ast
@@ -118,7 +142,7 @@ end
 reparse!(ast::EmptyLineAST) = ast
 
 # ------------------------------------------------------------------
-# EmptyLineAST
+# ObaAST
 function reparse!(ast::ObaAST)
 
     # TODO: find a better lazy split

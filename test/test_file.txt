@@ -14,6 +14,10 @@ A line of text
 println("Hi")
 %%
 
+%% #!Oba
+println("Hi")
+%%
+
 $$ Inline $$
 
 $$ 

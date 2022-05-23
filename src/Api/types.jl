@@ -92,6 +92,19 @@ mutable struct CommentBlockAST <: AbstractObaASTChild
 end
 
 ## ------------------------------------------------------------------
+# ObaScriptBlockAST
+mutable struct ObaScriptBlockAST <: AbstractObaASTChild
+    # source meta
+    parent::ObaAST
+    src::String
+    line::Int
+    # parsed
+    body::String
+    head::String
+    script::String
+end
+
+## ------------------------------------------------------------------
 # LatexTagAST
 struct LatexTagAST <: AbstractObaASTObj
     # source meta
