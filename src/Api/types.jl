@@ -9,7 +9,7 @@ abstract type AbstractObaASTObj <: AbstractObaAST end
 # ObaAST
 mutable struct ObaAST <: AbstractObaAST
     file::Union{String, Nothing}
-    childs::Vector{AbstractObaASTChild}
+    children::Vector{AbstractObaASTChild}
 end
 
 ## ------------------------------------------------------------------

@@ -45,7 +45,7 @@ using Test
     reparse!(AST0)
     @assert len0 + 1 == length(AST0)
 
-    # TODO: Test individual childs
+    # TODO: Test individual children
     
 
 end

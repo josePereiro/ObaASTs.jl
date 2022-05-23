@@ -154,7 +154,7 @@ function reparse!(ast::ObaAST)
         end
     end
     _new_ast = parse_lines(ch)
-    empty!(ast.childs)
-    append!(ast.childs, _new_ast.childs)
+    empty!(ast.children)
+    append!(ast.children, _new_ast.children)
     return ast
 end
