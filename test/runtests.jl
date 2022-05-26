@@ -11,7 +11,7 @@ using Test
         YamlBlockAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, CommentBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, CodeBlockAST, EmptyLineAST, TextLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, BlockLinkLineAST
     ]
     
-    global AST = parse_file(fn)
+    AST = parse_file(fn)
     @test true # no error
 
     # Test AST
@@ -47,5 +47,32 @@ using Test
 
     # TODO: Test individual children
     
+    # Utils
+    # child_idx
+    for (i, ch) in enumerate(AST)
+        @test ObaASTs.child_idx(AST[i]) == i
+    end
+
+    # iter_from
+    # down
+    for offset in -2:2, step in -1:1, idx0 in eachindex(AST)
+        iszero(step) && continue
+        
+        # Avoid index error
+        firstindex(AST) <= idx0 + offset <= lastindex(AST) || continue
+            
+        c = 0
+        iter_from(AST[idx0], step, offset) do i, ch
+            c+=1
+        end
+        
+        if step > 0
+            # down
+            @test length(AST) == c + ((idx0 + offset) - 1)
+        elseif step < 0
+            # down
+            @test c == (idx0 + offset)
+        end
+    end
 
 end

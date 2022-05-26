@@ -1,5 +1,11 @@
 # ------------------------------------------------------------------
 # utils
+"""
+    find_byline(AST, line::Int)
+
+Find (or return `nothing`) the index of the child which contain the given line
+
+"""
 function find_byline(AST, line::Int)
     prevli = 1
     for (chidx, child) in enumerate(AST)
@@ -11,48 +17,72 @@ function find_byline(AST, line::Int)
 end
 export find_byline
 
+# ------------------------------------------------------------------
 """
-Walk up the ObaAST from child to child till the begining from a given child AST (or child index).
-Eval the fun `f(chidx, child)` each time (do not eval at the starting child).
-If the function returns `true` it returns.
-It always returns `nothing`
+    child_idx(ch::AbstractObaASTChild)
+
+Find the first index of the given child in its parent AST
 """
-function iterup_from(f::Function, AST::ObaAST, chidx::Int)
-    chidx0 = firstindex(AST)
-    for i in (chidx-1):-1:chidx0
+child_idx(ch::AbstractObaASTChild) = findfirst(isequal(ch), parent_ast(ch))
+export child_idx
+
+# ------------------------------------------------------------------
+"""
+    iter_from(f::Function, AST::ObaAST, chidx::Integer, step::Integer, offset::Integer = 0)
+    iter_from(f::Function, ch::AbstractObaASTChild, step::Integer, offset::Integer = 0)
+    iter_from(f::Function, ch::AbstractObaASTChild; step::Integer = 1, offset::Integer = 0)
+
+Iterate for each child of the top AST starting from a given index or child.
+On each iteration the function `f(idx, child)` will be evaluated.
+The return value of the function `f` acts as a flag to short circuit the iteration.
+It is triggered at `f(idx, child) === true`.
+Use `step` to control the iteration step (if it is negative it iterate toward the first child).
+Use `offset` to move the starting point (usefull in cases where the starting point is a child object).
+The method do not check for index corretness
+
+# Examples
+```julia
+julia> iter_from((x...) -> nothing, child, 1, 0)
+# Iterate from `child` to the end of its parent ast
+
+julia> iter_from((x...) -> nothing, child, -1, 0)
+# Iterate from `child` to the begining of its parent ast
+
+julia> iter_from((x...) -> nothing, child, -1, -1)
+# Iterate from `child` to the begining of its parent ast skipping `child` itself
+```
+"""
+function iter_from(f::Function, AST::ObaAST, chidx::Integer, step::Integer, offset::Integer = 0)
+
+    il, iu = firstindex(AST), lastindex(AST)
+    i0 = chidx + offset
+    i1 = step > 0 ? #= iter down =# iu : #= iter up =# il
+
+    for i in i0:step:i1 
         f(i, AST[i]) === true && return
     end
     return
-end
 
-function iterup_from(f::Function, ch::AbstractObaASTChild)
-    AST = ch.parent
-    chidx = find_byline(AST, ch.line)
-    iterup_from(f, AST, chidx)
 end
-export iterup_from
+export iter_from
 
-"""
-Walk down the ObaAST from child to child till the end from a given child AST (or child index).
-Eval the fun `f(chidx, child)` each time (do not eval at the starting child).
-If the function returns `true` it returns.
-It always returns `nothing`
-"""
-function iterdown_from(f::Function, AST::ObaAST, chidx::Int)
-    chidx1 = lastindex(AST)
-    for i in (chidx + 1):chidx1
-        f(i, AST[i]) === true && return
-    end
-    return
-end
+iter_from(f::Function, ch::AbstractObaASTChild, step::Integer, offset::Integer = 0) =
+    iter_from(f, parent_ast(ch), child_idx(ch), step, offset)
 
-function iterdown_from(f::Function, ch::AbstractObaASTChild)
-    AST = ch.parent
-    chidx = find_byline(AST, ch.line)
-    iterdown_from(f, AST, chidx)
-end
-export iterdown_from
+iter_from(f::Function, ch::AbstractObaASTChild; 
+    step::Integer = 1,
+    offset::Integer = 0
+) = iter_from(f, ch, step, offset)
 
 # regex
 match_src(reg::Regex, ch::AbstractObaASTChild) = match(reg, source(ch))
+match_src(reg::Regex, ch::AbstractObaASTObj) = match(reg, source(ch))
 export match_src
+
+# 
+parent_file(ch::ObaAST) = ch.file
+parent_file(ch::AbstractObaASTChild) = parent_file(parent_ast(ch))
+parent_file(ch::AbstractObaASTObj) = parent_file(parent_ast(ch))
+export parent_file
+
+# ------------------------------------------------------------------
