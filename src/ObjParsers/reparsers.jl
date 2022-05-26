@@ -1,3 +1,4 @@
+# TODO: make all parsing sources/blocks coherent (mainly trailing \n)
 ## ------------------------------------------------------------------
 # Extract Regex
 # To extract from a src text (possible several lines)
