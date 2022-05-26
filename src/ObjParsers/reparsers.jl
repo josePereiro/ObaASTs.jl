@@ -65,24 +65,24 @@ function reparse!(ast::ObaScriptBlockAST)
     )
     # long flags
     for rmatch in eachmatch(OBA_SCRIPT_HEAD_LONG_FLAG_REGEX, head_src)
-        get!(head_ast.parsed, :longflags) do  
+        get!(head_ast.parsed, :params) do  
             Dict{String, Union{Nothing, String}}()
         end
         flag_src = _get_match(rmatch, :src)
         fkey = _get_match(rmatch, :key)
         fvalue = _get_match(rmatch, :value)
-        head_ast.parsed[:longflags][fkey] = fvalue
+        head_ast.parsed[:params][fkey] = fvalue
 
         # digest
         dig = replace(dig, flag_src => "")
     end
     # short flags
     for rmatch in eachmatch(OBA_SCRIPT_HEAD_SHORT_FLAG_REGEX, dig)
-        get!(head_ast.parsed, :shortflags, "")
+        get!(head_ast.parsed, :flags, "")
         
         flag_src = _get_match(rmatch, :src)
         flags = _get_match(rmatch, :flags)
-        head_ast.parsed[:shortflags] = string(head_ast.parsed[:shortflags], flags)
+        head_ast.parsed[:flags] = string(head_ast.parsed[:flags], flags)
 
         # digest
         dig = replace(dig, flag_src => "")

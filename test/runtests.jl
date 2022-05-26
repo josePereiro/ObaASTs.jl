@@ -75,4 +75,16 @@ using Test
         end
     end
 
+    # ObaScriptBlockAST utils
+    script_ast_idx = findfirst((ch) -> ch isa ObaScriptBlockAST, AST)
+    script_ast = AST[script_ast_idx]
+    lflags = get_params(script_ast)
+    @test !isnothing(lflags)
+    @test lflags["key"] == "value"
+    @test hasparam(script_ast, "key")
+
+    sflags = get_flags(script_ast)
+    @test sflags == "flags"
+    @test all(hasflag.([script_ast], "flags"))
+
 end

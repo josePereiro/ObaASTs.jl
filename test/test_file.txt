@@ -14,7 +14,7 @@ A line of text
 println("Hi")
 %%
 
-%% #!Oba
+%% #!Oba --key=value -flags
 println("Hi")
 %%
 

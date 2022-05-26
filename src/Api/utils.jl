@@ -20,10 +20,12 @@ export find_byline
 # ------------------------------------------------------------------
 """
     child_idx(ch::AbstractObaASTChild)
+    child_idx(idx::Integer) # A fallback
 
 Find the first index of the given child in its parent AST
 """
 child_idx(ch::AbstractObaASTChild) = findfirst(isequal(ch), parent_ast(ch))
+child_idx(idx::Integer) = idx
 export child_idx
 
 # ------------------------------------------------------------------
