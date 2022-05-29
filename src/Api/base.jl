@@ -27,15 +27,16 @@ Base.eachindex(ast::ObaAST) = eachindex(ast.children)
 Base.pairs(ast::ObaAST) = pairs(ast.children)
 Base.collect(ast::ObaAST) = collect(ast.children)
 
-Base.deleteat!(AST::ObaAST, i) = deleteat!(AST.children, i)
-function Base.delete!(AST::ObaAST, ch::AbstractObaASTChild)
-    idx = find_byline()
-end
+Base.deleteat!(AST::ObaAST, i) = deleteat!(AST.children, child_idx(i))
+Base.delete!(AST::ObaAST, ch::AbstractObaASTChild) = deleteat!(AST, ch)
 
 function Base.show(io::IO, ast::ObaAST)
 
     nchildren = length(ast)
     print(io, "ObaAST with ", nchildren, " child(s)")
+    if !isnothing(ast.file)
+        print(io, "\nfile: ", ast.file)
+    end
 
     # data
     if nchildren > 0

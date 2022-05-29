@@ -135,7 +135,6 @@ function set_param!(cmd_ast::ObaScriptBlockAST, key::AbstractString, value)
     params = get_params(cmd_ast)
     params = isnothing(params) ? Dict{String, Union{Nothing, String}}() : params
     params[key] = value
-    @show flags params
     new_head = _build_head_src(flags, params)
     return set_head!(cmd_ast, new_head)
 end
@@ -150,6 +149,17 @@ export get_flags
 function get_flags(ast::ObaScriptBlockAST)
     return get(ast[:head], :flags, "")
 end
+
+export add_flags!
+function add_flags!(cmd_ast::ObaScriptBlockAST, flags::String)
+    old_flags = get_flags(cmd_ast)
+    params = get_params(cmd_ast)
+    params = isnothing(params) ? Dict{String, Union{Nothing, String}}() : params
+    flags = join(unique(string(old_flags, flags)))
+    new_head = _build_head_src(flags, params)
+    return set_head!(cmd_ast, new_head)
+end
+
 
 export hasflag
 hasflag(ast::ObaScriptBlockAST, flag::String) = contains(get_flags(ast), flag)

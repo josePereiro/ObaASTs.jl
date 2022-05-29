@@ -190,15 +190,15 @@ reparse!(ast::EmptyLineAST) = ast
 # ObaAST
 function reparse!(ast::ObaAST)
 
-    # TODO: find a better lazy split
-    ch = Channel{SubString}(100) do ch_
-        for child in ast
-            for line in split(source(child), "\n")
-                put!(ch_, line)
-            end
-        end
+    _parser = LineParser()
+    for child in ast
+        _parse_lines!(_parser, split(source(child), "\n"))
     end
-    _new_ast = parse_lines(ch)
+    _new_ast = _parser.AST
+    for ch in _new_ast
+        ch.parent = ast
+    end
+    ast.reparse_conuter += 1
     empty!(ast.children)
     append!(ast.children, _new_ast.children)
     return ast

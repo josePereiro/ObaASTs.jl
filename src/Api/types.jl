@@ -73,6 +73,7 @@ end
 mutable struct ObaAST <: AbstractObaAST
     file::Union{String, Nothing}
     children::Vector{AbstractObaASTChild}
+    reparse_conuter::Int
 end
 
 ## ------------------------------------------------------------------

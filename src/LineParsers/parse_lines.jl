@@ -1,12 +1,4 @@
-# ------------------------------------------------------------------
-function _parse_lines(lines)
-
-    parser = LineParser(
-        #= AST =# ObaAST(nothing, Vector{AbstractObaAST}()),
-        #= scope =# INIT_SCOPE,
-        #= block_obj =# nothing,
-        #= lines_buff =# nothing
-    )
+function _parse_lines!(parser::LineParser, lines)
 
     # ----------------------------------------------------------------
     # WARNING: The order of the parsers calls is important
@@ -60,9 +52,19 @@ function _parse_lines(lines)
     parser.scope !== GLOBAL_SCOPE && !isnothing(parser.block_obj) && error(
         "Parsing failed, block ", parser.scope, " starting at line ", parser.block_obj.line, " unclosed!"
     )
+
+    return parser
+end
+
+# ------------------------------------------------------------------
+function _parse_lines(lines)
+
+    parser = LineParser()
+
+    _parse_lines!(parser, lines)
     
     # ----------------------------------------------------------------
-    # parsed part
+    # parsed childs
     foreach(reparse!, parser.AST)
 
     return parser.AST
