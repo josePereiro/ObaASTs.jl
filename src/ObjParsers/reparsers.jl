@@ -196,9 +196,10 @@ function reparse!(ast::ObaAST)
     end
     _new_ast = _parser.AST
     for ch in _new_ast
+        reparse!(ch)
         ch.parent = ast
     end
-    ast.reparse_conuter += 1
+    ast.reparse_counter += 1
     empty!(ast.children)
     append!(ast.children, _new_ast.children)
     return ast

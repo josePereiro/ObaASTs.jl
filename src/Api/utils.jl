@@ -81,10 +81,4 @@ match_src(reg::Regex, ch::AbstractObaASTChild) = match(reg, source(ch))
 match_src(reg::Regex, ch::AbstractObaASTObj) = match(reg, source(ch))
 export match_src
 
-# 
-parent_file(ch::ObaAST) = ch.file
-parent_file(ch::AbstractObaASTChild) = parent_file(parent_ast(ch))
-parent_file(ch::AbstractObaASTObj) = parent_file(parent_ast(ch))
-export parent_file
-
 # ------------------------------------------------------------------

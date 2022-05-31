@@ -38,11 +38,19 @@ function source(astv)
     return join(srcs, "\n")
 end
 
-parent_ast(ast::AbstractObaAST) = ast.parent
 parent_ast(ast::ObaAST) = ast
+parent_ast(ast::AbstractObaAST) = ast.parent
 
 parsed_dict(ast::AbstractObaASTChild) = ast.parsed
 parsed_dict(ast::AbstractObaASTObj) = ast.parsed
+
+parent_file(ch::ObaAST) = ch.file
+parent_file(ch::AbstractObaASTChild) = parent_file(parent_ast(ch))
+parent_file(ch::AbstractObaASTObj) = parent_file(parent_ast(ch))
+export parent_file
+
+reparse_counter(ch::ObaAST) = ch.reparse_counter
+export reparse_counter
 
 # ------------------------------------------------------------------
 # Type utils
