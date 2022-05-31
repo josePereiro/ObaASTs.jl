@@ -5,7 +5,7 @@ const YAML_BLOCK_END_LINE_REGEX          = r"\A-{3}\Z"
 
 const BLOCK_LINK_LINE_REGEX              = r"\A\^[\-a-zA-Z0-9]+\h*\Z"
 
-const HEADER_LINE_REGEX                  = r"\A\h*\#{1,}\h\N*\Z"
+const HEADER_LINE_REGEX                  = r"\A\#{1,}(?:(?:\h*)|(?:\h+\N*))\Z"
 
 const COMMENT_BLOCK_INLINE_REGEX         = r"\A\h*\%{2}(?:(?!\%{2}).)*\%{2}\h*\Z"
 const COMMENT_BLOCK_START_LINE_REGEX     = r"\A\h*\%{2}(?:(?!\%{2}).)*\Z"

@@ -4,7 +4,7 @@
 # To extract from a src text (possible several lines)
 const TAG_PARSE_REGEX                 = r"(?<src>\#(?<label>[A-Za-z_][A-Za-z0-9_/]*))"
 const INTERNAL_LINK_PARSE_REGEX       = r"(?<src>\[\[(?<file>[^\|\#\n]*?)(?:\#(?<header>[^\|\n]*?))?(?:\|(?<alias>[^\n]*?))?\]\])"
-const HEADER_LINE_PARSER_REGEX        = r"(?<src>(?<lvl>\#+)\h+(?<title>.*))"
+const HEADER_LINE_PARSER_REGEX        = r"(?<src>(?<lvl>\#+)(?<title>(?:\h+\N*)|(?:\h*)))"
 const CODE_BLOCK_PARSER_REGEX         = r"(?<src>`{3}\h*(?<lang>\N*)\n(?<body>(?:\n?\N*)*)\n`{3}\h*)"
 const COMMENT_BLOCK_PARSER_REGEX      = r"(?<src>\h*\%{2}(?<body>(?:.*\n?)*)\%{2}\h*)"
 const LATEX_BLOCK_PARSER_REGEX        = r"(?<src>\h*\${2}(?<body>(?:.*\n?)*)\${2}\h*)"
@@ -17,6 +17,29 @@ const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>\h*\%{2}\h*(?<head>\#\!Oba\N*)\
 function reparse!(ast::YamlBlockAST)
     src = ast.src
     ast.parsed[:yaml] = YAML.load(src)
+    
+    # Tags
+    for (k, tags) in ast.parsed[:yaml]
+        kstr = uppercase(k)
+        kstr in ["TAG", "TAGS"] || continue
+        tags = tags isa Vector ? tags : [tags]
+
+        for dig in tags, rmatch in eachmatch(TAG_PARSE_REGEX, dig)
+            tag_src = _get_match(rmatch, :src)
+            tag_src != dig && error("Tag parsing faild. src: ", dig)
+            get!(ast.parsed, :tags) do
+                TagAST[]
+            end
+            tag_ast = TagAST(
+                #= parent =# ast,
+                #= src =# tag_src,
+                #= pos =# _match_pos(rmatch)
+            )
+            tag_ast.parsed[:label] = _get_match(rmatch, :label)
+            push!(ast.parsed[:tags], tag_ast)
+        end
+    end
+    
     return ast
 end
 
@@ -25,7 +48,7 @@ end
 function reparse!(ast::HeaderLineAST)
     src = ast.src
     rmatch = match(HEADER_LINE_PARSER_REGEX, src)
-    ast.parsed[:title] = _get_match(rmatch, :title)
+    ast.parsed[:title] = string(strip(_get_match(rmatch, :title)))
     ast.parsed[:lvl] = length(_get_match(rmatch, :lvl))
     return ast
 end

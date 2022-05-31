@@ -12,6 +12,7 @@ export istextline, isemptyline, isheaderline, isblocklinkline, iscommentblock
 export isscriptblock, islatexblock, iscodeblock, isyamlblock
 
 include("Api/types.jl")
+include("Api/oba_script_ast.jl")
 include("Api/ast.jl")
 include("Api/base.jl")
 include("Api/parser.jl")

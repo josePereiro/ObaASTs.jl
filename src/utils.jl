@@ -1,4 +1,10 @@
 # ------------------------------------------------------------------
+function _hasmatch(r::Regex, str::AbstractString) 
+    m = match(r, str)
+    return !isnothing(m)
+end
+
+# ------------------------------------------------------------------
 function _get_match(rmatch::RegexMatch, ksym::Symbol, dflt = nothing) 
     cap = rmatch[ksym]
     return isnothing(cap) ? dflt : string(cap)
