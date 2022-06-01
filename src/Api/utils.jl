@@ -82,3 +82,16 @@ match_src(reg::Regex, ch::AbstractObaASTObj) = match(reg, source(ch))
 export match_src
 
 # ------------------------------------------------------------------
+function Base.findnext(f::Function, ast::ObaAST, chidx::Integer)::Union{Int, Nothing}
+    found = nothing
+    iter_from(ast, chidx, 1, 1) do idx, ch
+        if f(ch) === true
+            found = idx
+            return true
+        end
+        return false
+    end
+    return found
+end
+
+Base.findnext(f::Function, ch::AbstractObaASTChild) = findnext(f, parent_ast(ch), child_idx(ch))

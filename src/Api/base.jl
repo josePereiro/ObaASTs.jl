@@ -56,7 +56,7 @@ function Base.show(io::IO, ast::AbstractObaAST)
     print(io, nameof(typeof(ast)), " \"", _preview(io, source(ast)), "\"")
 end
 
-Base.filter(fun::Function, ast::ObaAST) = ObaAST(ast.file, filter(fun, ast.children))
+Base.filter(fun::Function, ast::ObaAST) = ObaAST(ast.file, filter(fun, ast.children), ast.reparse_counter)
 
 Base.getindex(ast::AbstractObaASTChild, key::Symbol) = getindex(ast.parsed, key)
 Base.getindex(ast::AbstractObaASTObj, key::Symbol) = getindex(ast.parsed, key)

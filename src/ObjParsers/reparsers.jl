@@ -8,8 +8,8 @@ const HEADER_LINE_PARSER_REGEX        = r"(?<src>(?<lvl>\#+)(?<title>(?:\h+\N*)|
 const CODE_BLOCK_PARSER_REGEX         = r"(?<src>`{3}\h*(?<lang>\N*)\n(?<body>(?:\n?\N*)*)\n`{3}\h*)"
 const COMMENT_BLOCK_PARSER_REGEX      = r"(?<src>\h*\%{2}(?<body>(?:.*\n?)*)\%{2}\h*)"
 const LATEX_BLOCK_PARSER_REGEX        = r"(?<src>\h*\${2}(?<body>(?:.*\n?)*)\${2}\h*)"
-const LATEX_TAG_PARSE_REGEX           = r"(?<src>\\tag\{(?<label>\N+)\})"
-const BLOCK_LINK_PARSER_REGEX         = r"(?<src>\^(?<link>[\-a-zA-Z0-9]+)\h*)\Z"
+const LATEX_TAG_PARSE_REGEX           = r"(?<src>\\tag\{(?<label>\N+?)\})"
+const BLOCK_LINK_PARSER_REGEX         = r"(?<src>\^(?<label>[\-a-zA-Z0-9]+)\h*)\Z"
 const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>\h*\%{2}\h*(?<head>\#\!Oba\N*)\n(?<body>(?:```\N*\n)?(?<script>(?:.*\n?)*?)(?:```\h*\n)?)\%{2}\h*)"
 
 # ------------------------------------------------------------------
@@ -58,7 +58,7 @@ end
 function reparse!(ast::BlockLinkLineAST)
     src = ast.src
     rmatch = match(BLOCK_LINK_PARSER_REGEX, src)
-    ast.parsed[:link] = _get_match(rmatch, :link)
+    ast.parsed[:label] = _get_match(rmatch, :label)
     return ast
 end
 
