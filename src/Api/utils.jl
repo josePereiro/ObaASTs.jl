@@ -24,7 +24,9 @@ export find_byline
 
 Find the first index of the given child in its parent AST
 """
-child_idx(ch::AbstractObaASTChild) = findfirst(isequal(ch), parent_ast(ch))
+child_idx(ast::ObaAST, ch::AbstractObaASTChild) = findfirst(isequal(ch), ast)
+child_idx(::ObaAST, idx::Integer) = idx
+child_idx(ch::AbstractObaASTChild) = child_idx(parent_ast(ch), ch)
 child_idx(idx::Integer) = idx
 export child_idx
 

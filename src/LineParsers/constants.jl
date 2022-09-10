@@ -29,7 +29,6 @@ const BLANK_LINE_REGEX                   = r"\A\h*\Z"
 
 # ------------------------------------------------------------------
 # Types and Scope
-const INIT_SCOPE = :INIT
 const GLOBAL_SCOPE = :GLOBAL
 const YAML_BLOCK = :YAML_BLOCK
 const COMMENT_BLOCK = :COMMENT_BLOCK

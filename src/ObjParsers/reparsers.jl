@@ -10,7 +10,8 @@ const COMMENT_BLOCK_PARSER_REGEX      = r"(?<src>\h*\%{2}(?<body>(?:.*\n?)*)\%{2
 const LATEX_BLOCK_PARSER_REGEX        = r"(?<src>\h*\${2}(?<body>(?:.*\n?)*)\${2}\h*)"
 const LATEX_TAG_PARSE_REGEX           = r"(?<src>\\tag\{(?<label>\N+?)\})"
 const BLOCK_LINK_PARSER_REGEX         = r"(?<src>\^(?<label>[\-a-zA-Z0-9]+)\h*)\Z"
-const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>\h*\%{2}\h*(?<head>\#\!Oba\N*)\n(?<body>(?:```\N*\n)?(?<script>(?:.*\n?)*?)(?:```\h*\n)?)\%{2}\h*)"
+# const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>\h*\%{2}\h*(?<head>\#\!Oba\N*)\n(?<body>(?:```\N*\n)?(?<script>(?:.*\n?)*?)(?:```\h*\n)?)\%{2}\h*)"
+const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>(?:\%{2})?\h*\n?(?:`{3})?julia\h*(?<head>\#\!Oba\N*)\n(?<body>(?:```\N*\n)?(?<script>(?:.*\n?)*?)(?:```\h*\n)?)(?:`{3})\h*\n?(?:\%{2})?\h*)"
 
 # ------------------------------------------------------------------
 # YamlBlockAST
@@ -72,20 +73,13 @@ function reparse!(ast::CommentBlockAST)
 end
 
 # ------------------------------------------------------------------
-# ObaScriptBlockAST
-function reparse!(ast::ObaScriptBlockAST)
-    src = ast.src
-    rmatch = match(OBA_SCRIPT_BLOCK_PARSER_REGEX, src)
-    ast.parsed[:body] = _get_match(rmatch, :body)
-    ast.parsed[:script] = _get_match(rmatch, :script)
+function _parse_script_head(ast::ObaScriptBlockAST, head_src::AbstractString)
     
-    # head
-    head_src = _get_match(rmatch, :head)
     dig = head_src
     head_ast = ObaScriptHeadAST(
         #= parent =# ast,
         #= src =# head_src,
-        #= pos =# findfirst(head_src, src)
+        #= pos =# findfirst(head_src, ast.src)
     )
     # long flags
     for rmatch in eachmatch(OBA_SCRIPT_HEAD_LONG_FLAG_REGEX, head_src)
@@ -115,7 +109,20 @@ function reparse!(ast::ObaScriptBlockAST)
     # check diggest
     strip(dig) == "#!Oba" || error("The script head is not well structured. ObaScriptBlockAST at line: ", ast.line, ". Digest: ", dig)
 
-    ast.parsed[:head] = head_ast
+    return head_ast
+end
+
+# ------------------------------------------------------------------
+# ObaScriptBlockAST
+function reparse!(ast::ObaScriptBlockAST)
+    src = ast.src
+    rmatch = match(OBA_SCRIPT_BLOCK_PARSER_REGEX, src)
+    # ast.parsed[:body] = _get_match(rmatch, :body)
+    ast.parsed[:script] = _get_match(rmatch, :script)
+    
+    # head
+    head_src = _get_match(rmatch, :head)
+    ast.parsed[:head] = _parse_script_head(ast, head_src)
     
     return ast
 end
@@ -175,6 +182,8 @@ function reparse!(ast::TextLineAST)
     # TODO: extract inline latexs
     
     # TODO: extract external links
+    
+    # TODO: extract markdown links
 
     
     return ast
@@ -211,19 +220,28 @@ reparse!(ast::EmptyLineAST) = ast
 
 # ------------------------------------------------------------------
 # ObaAST
+_reparent!(ch::AbstractObaASTChild, new_parent::ObaAST) = (ch.parent = new_parent)
+function _reparent!(ast, new_parent::ObaAST)
+    for ch in ast
+        _reparent!(ch, new_parent)
+    end
+end
+
 function reparse!(ast::ObaAST)
 
+    # reparse
     _parser = LineParser()
     for child in ast
-        _parse_lines!(_parser, split(source(child), "\n"))
+        _feed_parser!(_parser, split(source(child), "\n"))
     end
     _new_ast = _parser.AST
-    for ch in _new_ast
-        reparse!(ch)
-        ch.parent = ast
-    end
+    foreach(reparse!, _new_ast)
+
+    # up ast
     ast.reparse_counter += 1
-    empty!(ast.children)
-    append!(ast.children, _new_ast.children)
+    resize!(ast.children, length(_new_ast.children))
+    ast.children .= _new_ast.children
+    _reparent!(_new_ast.children, ast)
+
     return ast
 end

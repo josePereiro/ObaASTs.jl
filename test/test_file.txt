@@ -14,8 +14,10 @@ A line of text
 println("Hi")
 %%
 
-%% #!Oba --key=value -flags
+%% 
+```julia #!Oba --key=value -flags
 println("Hi")
+```
 %%
 
 $$ Inline $$
@@ -28,6 +30,10 @@ Multiline
 $$
 
 ```julia
+println("Hi")
+```
+
+```julia #!Oba --key=value -flags
 println("Hi")
 ```
 

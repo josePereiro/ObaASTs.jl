@@ -8,7 +8,7 @@ using Test
     fn = joinpath(@__DIR__, "test_file.txt")
     # keep this sync with file
     file_content_types = [
-        YamlBlockAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, CommentBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, CodeBlockAST, EmptyLineAST, TextLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, BlockLinkLineAST
+        YamlBlockAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, CommentBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, CodeBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, TextLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, BlockLinkLineAST
     ]
     
     AST = parse_file(fn)
@@ -30,7 +30,8 @@ using Test
     # test reparse!
     AST0 = deepcopy(AST)
     reparse!(AST0)
-    for (ch, ch0) in zip(AST, AST0)
+    for (i, (ch, ch0)) in enumerate(zip(AST, AST0))
+        @info("Testing line $(ch.line)")
         @test typeof(ch) === typeof(ch0)
         @test ch.line == ch.line
         @test ch.src == ch.src

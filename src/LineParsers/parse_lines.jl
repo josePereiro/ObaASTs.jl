@@ -1,50 +1,45 @@
-function _parse_lines!(parser::LineParser, lines)
+function _feed_parser!(parser::LineParser, lines)
 
     # ----------------------------------------------------------------
     # WARNING: The order of the parsers calls is important
-    for (li, line) in enumerate(lines)
-        
-        line = string(line)
+    for line in lines
+
+        # ----------------------------------------------------------------
+        # new line
+        parser.li += 1
+        parser.line = string(line)
 
         # ----------------------------------------------------------------
         # yaml section start
-        _parse_yaml_line!(parser, line, li) && continue
+        _parse_yaml_line!(parser) && continue
         
         # ----------------------------------------------------------------
-        # unvalidate INIT_SCOPE
-        _invalidate_init_scope!(parser, line, li)
-
-        # ----------------------------------------------------------------
         # HEADER LINE
-        _parse_header_line!(parser, line, li) && continue
+        _parse_header_line!(parser) && continue
 
         # ----------------------------------------------------------------
         # BlockLinkLineAST
-        _parse_block_link_line!(parser, line, li) && continue
-        
-        # ----------------------------------------------------------------
-        # OBA SCRIPT BLOCK
-        _parse_oba_script_line!(parser, line, li) && continue
+        _parse_block_link_line!(parser) && continue
        
         # ----------------------------------------------------------------
         # COMMENT BLOCK
-        _parse_comment_block_line!(parser, line, li) && continue
+        _parse_comment_block_line!(parser) && continue
 
         # ----------------------------------------------------------------
         # LATEX BLOCK
-        _parse_latex_block_line!(parser, line, li) && continue
+        _parse_latex_block_line!(parser) && continue
 
         # ----------------------------------------------------------------
         # CODE BLOCK
-        _parse_code_block_line!(parser, line, li) && continue
+        _parse_code_block_line!(parser) && continue
 
         # ----------------------------------------------------------------
         # Text line
-        _parse_text_line!(parser, line, li) && continue
+        _parse_text_line!(parser) && continue
 
         # ----------------------------------------------------------------
         # empty line
-        _parse_empty_line!(parser, line, li) && continue
+        _parse_empty_line!(parser) && continue
 
     end
 
@@ -53,7 +48,11 @@ function _parse_lines!(parser::LineParser, lines)
         "Parsing failed, block ", parser.scope, " starting at line ", parser.block_obj.line, " unclosed!"
     )
 
-    return parser
+    # ----------------------------------------------------------------
+    # promote scripts
+    _promote_obascripts!(parser.AST)
+
+    return nothing
 end
 
 # ------------------------------------------------------------------
@@ -61,7 +60,7 @@ function _parse_lines(lines)
 
     parser = LineParser()
 
-    _parse_lines!(parser, lines)
+    _feed_parser!(parser, lines)
     
     # ----------------------------------------------------------------
     # parsed childs

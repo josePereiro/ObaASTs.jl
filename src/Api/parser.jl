@@ -9,4 +9,4 @@ function parse_file(path::AbstractString)
     AST.file = abspath(path)
     return AST
 end
-parse_string(src::AbstractString) = parse_lines(split(src))
+parse_string(src::AbstractString) = parse_lines(split(src, "\n"))

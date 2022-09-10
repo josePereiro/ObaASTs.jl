@@ -31,10 +31,7 @@ end
 _source(ast::AbstractObaAST) = source(ast)
 
 function source(astv)
-    srcs = String[]
-    for asti in astv
-        push!(srcs, _source(asti))
-    end
+    srcs = map(_source, astv)
     return join(srcs, "\n")
 end
 
@@ -68,7 +65,6 @@ isblocklinkline(::BlockLinkLineAST) = true
 
 iscommentblock(::AbstractObaAST) = false
 iscommentblock(::CommentBlockAST) = true
-iscommentblock(::ObaScriptBlockAST) = true
 
 isscriptblock(::AbstractObaAST) = false
 isscriptblock(::ObaScriptBlockAST) = true
@@ -83,15 +79,6 @@ isyamlblock(::AbstractObaAST) = false
 isyamlblock(::YamlBlockAST) = true
 
 # ------------------------------------------------------------------
-# ObaAST
-write!(io::IO, ast::ObaAST) = write(io, reparse!(ast))
-function write!(ast::ObaAST) 
-    file = parent_file(ast)
-    isnothing(file) && error("The ObaAST do not have a source file!")
-    write(file, reparse!(ast))
-end
-export write!
-
 function get_tags(ast::ObaAST)
     tags = TagAST[]
     for ch in ast

@@ -1,27 +1,27 @@
 # ------------------------------------------------------------------
-function _parse_yaml_line!(parser::LineParser, line, li)
+function _parse_yaml_line!(parser::LineParser)
 
     # short circuit
-    parser.scope === INIT_SCOPE || parser.scope === YAML_BLOCK || return false
+    parser.li == 1 || parser.scope === YAML_BLOCK || return false
 
-    rmatch = match(YAML_BLOCK_START_LINE_REGEX, line)
-    if parser.scope === INIT_SCOPE && !isnothing(rmatch)
+    rmatch = match(YAML_BLOCK_START_LINE_REGEX, parser.line)
+    if parser.scope === GLOBAL_SCOPE && !isnothing(rmatch)
         parser.block_obj = YamlBlockAST(
             #= parent =# parser.AST, 
             #= src =# "", 
-            #= line =# li
+            #= line =# parser.li
         )
         # enter block
         push!(parser.AST, parser.block_obj)
-        parser.lines_buff = String[line]
+        parser.lines_buff = String[parser.line]
         parser.scope = YAML_BLOCK
         return true
     end
 
     # yaml section content/end
     if parser.scope === YAML_BLOCK
-        push!(parser.lines_buff, line)
-        rmatch = match(YAML_BLOCK_END_LINE_REGEX, line)
+        push!(parser.lines_buff, parser.line)
+        rmatch = match(YAML_BLOCK_END_LINE_REGEX, parser.line)
         if !isnothing(rmatch)
             # exit block
             parser.scope = GLOBAL_SCOPE

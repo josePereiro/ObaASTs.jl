@@ -12,7 +12,7 @@ abstract type AbstractObaASTObj <: AbstractObaAST end
     Generate a AbstractObaASTChild object subtype
 """
 macro ObaASTChild(name)
-    isdefined(Main, name) && return :(nothing)
+    isdefined(@__MODULE__, name) && return :(nothing)
     return quote
         mutable struct $(name) <: AbstractObaASTChild
             # source meta
@@ -43,7 +43,7 @@ end
     Generate a AbstractObaASTObj object subtype
 """
 macro ObaASTObj(name)
-    isdefined(Main, name) && return :(nothing)
+    isdefined(@__MODULE__, name) && return :(nothing)
     return quote
         mutable struct $(name) <: AbstractObaASTObj
             # source meta

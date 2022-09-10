@@ -27,8 +27,22 @@ Base.eachindex(ast::ObaAST) = eachindex(ast.children)
 Base.pairs(ast::ObaAST) = pairs(ast.children)
 Base.collect(ast::ObaAST) = collect(ast.children)
 
-Base.deleteat!(AST::ObaAST, i) = deleteat!(AST.children, child_idx(i))
-Base.delete!(AST::ObaAST, ch::AbstractObaASTChild) = deleteat!(AST, ch)
+Base.deleteat!(ast::ObaAST, i) = deleteat!(ast.children, child_idx(i))
+Base.splice!(ast::ObaAST, index) = splice!(ast.children, index)
+Base.splice!(ast::ObaAST, index, replacement) = splice!(ast.children, index, replacement)
+function Base.splice!(ast::ObaAST, index, replacement::AbstractString) 
+    _src_ast = parse_string(replacement)
+    _reparent!(_src_ast, ast)
+    splice!(ast.children, index, _src_ast)
+end
+Base.insert!(ast::ObaAST, index, item::AbstractObaASTChild) = insert!(ast.children, child_idx(index), item)
+Base.insert!(ast::ObaAST, index, item) = (i = child_idx(index); splice!(ast, i:i - 1, item))
+Base.append!(ast::ObaAST, items...) = append!(ast.children, items...)
+function Base.append!(ast::ObaAST, src::AbstractString)
+    _src_ast = parse_string(src)
+    _reparent!(_src_ast, ast)
+    append!(ast, _src_ast.children)
+end
 
 function Base.show(io::IO, ast::ObaAST)
 
@@ -40,10 +54,10 @@ function Base.show(io::IO, ast::ObaAST)
 
     # data
     if nchildren > 0
-        print(io, "\nchild(s):")
+        print(io, "\nchild(s): idx/line/preview")
         _show_data_preview(io, ast) do chidx, child
             child isa EmptyLineAST && return false # ignore empty
-            print(io, "\n[", chidx, "] ")
+            print(io, "\n[", chidx, "] :", child.line, " ")
             show(io, child)
             return false
         end
