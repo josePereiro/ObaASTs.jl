@@ -49,8 +49,8 @@ function _feed_parser!(parser::LineParser, lines)
     )
 
     # ----------------------------------------------------------------
-    # promote scripts
-    _promote_obascripts!(parser.AST)
+    # promoters
+    run_promoters!(parser)
 
     return nothing
 end

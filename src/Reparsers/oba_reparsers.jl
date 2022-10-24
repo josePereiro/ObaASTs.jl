@@ -15,7 +15,7 @@ const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>(?:\%{2})?\h*\n?(?:`{3})?julia\
 
 # ------------------------------------------------------------------
 # YamlBlockAST
-function reparse!(ast::YamlBlockAST)
+function _oba_reparse!(ast::YamlBlockAST)
     src = ast.src
     ast.parsed[:yaml] = YAML.load(src)
     
@@ -46,7 +46,7 @@ end
 
 # ------------------------------------------------------------------
 # HeaderLineAST
-function reparse!(ast::HeaderLineAST)
+function _oba_reparse!(ast::HeaderLineAST)
     src = ast.src
     rmatch = match(HEADER_LINE_PARSER_REGEX, src)
     ast.parsed[:title] = string(strip(_get_match(rmatch, :title)))
@@ -56,7 +56,7 @@ end
 
 # ------------------------------------------------------------------
 # BlockLinkLineAST
-function reparse!(ast::BlockLinkLineAST)
+function _oba_reparse!(ast::BlockLinkLineAST)
     src = ast.src
     rmatch = match(BLOCK_LINK_PARSER_REGEX, src)
     ast.parsed[:label] = _get_match(rmatch, :label)
@@ -65,7 +65,7 @@ end
 
 # ------------------------------------------------------------------
 # CommentBlockAST
-function reparse!(ast::CommentBlockAST)
+function _oba_reparse!(ast::CommentBlockAST)
     src = ast.src
     rmatch = match(COMMENT_BLOCK_PARSER_REGEX, src)
     ast.parsed[:body] = _get_match(rmatch, :body)
@@ -114,7 +114,7 @@ end
 
 # ------------------------------------------------------------------
 # ObaScriptBlockAST
-function reparse!(ast::ObaScriptBlockAST)
+function _oba_reparse!(ast::ObaScriptBlockAST)
     src = ast.src
     rmatch = match(OBA_SCRIPT_BLOCK_PARSER_REGEX, src)
     # ast.parsed[:body] = _get_match(rmatch, :body)
@@ -129,7 +129,7 @@ end
 
 # ------------------------------------------------------------------
 # CodeBlockAST
-function reparse!(ast::CodeBlockAST)
+function _oba_reparse!(ast::CodeBlockAST)
     src = ast.src
     rmatch = match(CODE_BLOCK_PARSER_REGEX, src)
     ast.parsed[:lang] = _get_match(rmatch, :lang, "")
@@ -139,7 +139,7 @@ end
 
 # ------------------------------------------------------------------
 # TextLineAST
-function reparse!(ast::TextLineAST)
+function _oba_reparse!(ast::TextLineAST)
     src = ast.src
     dig = src # digest
 
@@ -192,7 +192,7 @@ end
 
 # ------------------------------------------------------------------
 # LatexBlockAST
-function reparse!(ast::LatexBlockAST)
+function _oba_reparse!(ast::LatexBlockAST)
     src = ast.src
 
     # latex
@@ -216,32 +216,16 @@ end
 
 # ------------------------------------------------------------------
 # EmptyLineAST
-reparse!(ast::EmptyLineAST) = ast
+_oba_reparse!(ast::EmptyLineAST) = ast
 
-# ------------------------------------------------------------------
-# ObaAST
-_reparent!(ch::AbstractObaASTChild, new_parent::ObaAST) = (ch.parent = new_parent)
-function _reparent!(ast, new_parent::ObaAST)
-    for ch in ast
-        _reparent!(ch, new_parent)
+## ------------------------------------------------------------------
+# Registry obsidian reparsers
+function _register_oba_childs()
+    for T in [
+            TextLineAST, BlockLinkLineAST, EmptyLineAST, 
+            HeaderLineAST, CommentBlockAST, ObaScriptBlockAST, 
+            LatexBlockAST, CodeBlockAST, YamlBlockAST
+        ]
+            register_reparser!(_oba_reparse!, T)
     end
-end
-
-function reparse!(ast::ObaAST)
-
-    # reparse
-    _parser = LineParser()
-    for child in ast
-        _feed_parser!(_parser, split(source(child), "\n"))
-    end
-    _new_ast = _parser.AST
-    foreach(reparse!, _new_ast)
-
-    # up ast
-    ast.reparse_counter += 1
-    resize!(ast.children, length(_new_ast.children))
-    ast.children .= _new_ast.children
-    _reparent!(_new_ast.children, ast)
-
-    return ast
 end

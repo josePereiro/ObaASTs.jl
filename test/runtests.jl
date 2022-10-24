@@ -31,7 +31,7 @@ using Test
     AST0 = deepcopy(AST)
     reparse!(AST0)
     for (i, (ch, ch0)) in enumerate(zip(AST, AST0))
-        @info("Testing line $(ch.line)")
+        @info("Testing line $(ch.line): $(typeof(ch))")
         @test typeof(ch) === typeof(ch0)
         @test ch.line == ch.line
         @test ch.src == ch.src
