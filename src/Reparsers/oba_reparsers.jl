@@ -10,7 +10,6 @@ const COMMENT_BLOCK_PARSER_REGEX      = r"(?<src>\h*\%{2}(?<body>(?:.*\n?)*)\%{2
 const LATEX_BLOCK_PARSER_REGEX        = r"(?<src>\h*\${2}(?<body>(?:.*\n?)*)\${2}\h*)"
 const LATEX_TAG_PARSE_REGEX           = r"(?<src>\\tag\{(?<label>\N+?)\})"
 const BLOCK_LINK_PARSER_REGEX         = r"(?<src>\^(?<label>[\-a-zA-Z0-9]+)\h*)\Z"
-# const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>\h*\%{2}\h*(?<head>\#\!Oba\N*)\n(?<body>(?:```\N*\n)?(?<script>(?:.*\n?)*?)(?:```\h*\n)?)\%{2}\h*)"
 const OBA_SCRIPT_BLOCK_PARSER_REGEX   = r"(?<src>(?:\%{2})?\h*\n?(?:`{3})?julia\h*(?<head>\#\!Oba\N*)\n(?<body>(?:```\N*\n)?(?<script>(?:.*\n?)*?)(?:```\h*\n)?)(?:`{3})\h*\n?(?:\%{2})?\h*)"
 
 # ------------------------------------------------------------------

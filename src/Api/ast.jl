@@ -79,35 +79,55 @@ isyamlblock(::AbstractObaAST) = false
 isyamlblock(::YamlBlockAST) = true
 
 # ------------------------------------------------------------------
-function get_tags(ast::ObaAST)
-    tags = TagAST[]
+export collect_parsed
+function collect_parsed(ast::ObaAST, key::Symbol; 
+        T::DataType = Any, 
+        reduce = (x) -> isa(x, Vector)
+    )
+    objs = T[]
     for ch in ast
-        tags_ = get(ch, :tags, nothing)
-        !isnothing(tags_) && push!(tags, tags_...)
+        obj_ = get(ch, key, nothing)
+        isnothing(obj_) && continue 
+        reduce(obj_) ? push!(objs, obj_...) : push!(objs, obj_)
     end
-    return tags
+    return objs
 end
-export get_tags
 
-function foreach_tag(f::Function, ast::ObaAST)
+export foreach_parsed
+function foreach_parsed(f::Function, ast::ObaAST, key::Symbol)
     for ch in ast
-        tags = get(ch, :tags, nothing)
-        isnothing(tags) && continue
-        for tag in tags
-            f(tag) === true && return nothing
+        objs = get(ch, key, nothing)
+        isnothing(objs) && continue
+        for obj in objs
+            f(obj) === true && return nothing
         end
     end
     return nothing
 end
-export foreach_tag
 
-function hastag(f::Function, ast::ObaAST)
+export find_parsed
+function find_parsed(f::Function, ast::ObaAST, key::Symbol)
     flag = false
-    foreach_tag(ast) do tag
-        flag = f(tag)
+    foreach_parsed(ast, key) do obj
+        flag = f(obj); return flag
     end
     return flag
 end
+
+# ------------------------------------------------------------------
+# TagAST
+export hastag, tags, foreach_tag
+tags(ast::ObaAST) = collect_parsed(ast, :tags; T = TagAST)
+foreach_tag(f::Function, ast::ObaAST) = foreach_parsed(f, ast, :tags)
+hastag(f::Function, ast::ObaAST) = find_parsed(f, ast, :tags)
 hastag(ast::ObaAST, label::String) = hastag((tag) -> tag[:label] == label, ast)
 hastag(ast::ObaAST, reg::Regex) = hastag((tag) -> _hasmatch(reg, tag[:label]), ast)
-export hastag
+
+# ------------------------------------------------------------------
+# InternalLinkAST
+export hasinlink, inlinks, foreach_inlink
+inlinks(ast::ObaAST) = collect_parsed(ast, :inlinks; T = InternalLinkAST)
+foreach_inlinks(f::Function, ast::ObaAST) =  foreach_parsed(f, ast, :inlinks)
+hasinlink(f::Function, ast::ObaAST) = find_parsed(f, ast, :inlinks)
+hasinlink(ast::ObaAST, file::String) = hasinlink((inlinks) -> inlinks[:file] == file, ast)
+hasinlink(ast::ObaAST, reg::Regex) = hasinlink((inlinks) -> _hasmatch(reg, inlinks[:file]), ast)

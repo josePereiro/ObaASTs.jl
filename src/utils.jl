@@ -18,10 +18,12 @@ function _match_pos(rm::RegexMatch)
 end
 
 # ------------------------------------------------------------------
-function _preview(io::IO, str, hlim = displaysize(io)[2])
+function _preview(str::AbstractString, hlim::Int)
     hlim = max(40, floor(Int, hlim * 0.8))
-    (length(str) <= hlim) ? escape_string(str) : escape_string(SubString(str, 1, hlim), "...")
+    str = (length(str) <= hlim) ? str : string(first(str, hlim), "...")
+    return escape_string(str)
 end
+_preview(io::IO, str::AbstractString) = _preview(str, displaysize(io)[2])
 
 # ------------------------------------------------------------------
 function _show_data_preview(f::Function, io::IO, col)

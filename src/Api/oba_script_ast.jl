@@ -1,5 +1,6 @@
 # ------------------------------------------------------------------
 # ObaScriptBlockAST
+export set_script!
 function set_script!(cmd::ObaScriptBlockAST, new_script::AbstractString)
     old_script = cmd.parsed[:script]
     new_script = endswith(new_script, "\n") ? new_script : string(new_script, "\n")
@@ -7,8 +8,8 @@ function set_script!(cmd::ObaScriptBlockAST, new_script::AbstractString)
     reparse!(cmd)
     return cmd
 end
-export set_script!
 
+export set_head!
 function set_head!(cmd::ObaScriptBlockAST, new_head::AbstractString)
     old_head = source(cmd[:head])
     new_head = strip(new_head)
@@ -16,7 +17,6 @@ function set_head!(cmd::ObaScriptBlockAST, new_head::AbstractString)
     reparse!(cmd)
     return cmd
 end
-export set_head!
 
 export get_params
 get_params(ast::ObaScriptBlockAST, dflt = nothing) = get(ast[:head], :params, dflt)
@@ -60,9 +60,7 @@ function hasparam(cmd_ast::ObaScriptBlockAST, key::AbstractString)
 end
 
 export get_flags
-function get_flags(ast::ObaScriptBlockAST)
-    return get(ast[:head], :flags, "")
-end
+get_flags(ast::ObaScriptBlockAST) = get(ast[:head], :flags, "")
 
 export add_flags!
 function add_flags!(cmd_ast::ObaScriptBlockAST, flags::String)

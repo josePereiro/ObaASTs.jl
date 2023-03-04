@@ -17,6 +17,8 @@ function reparse!(ast::AbstractObaAST)
     foreach((f!) -> f!(ast), REPARSERS_BOOK[T])
     return ast
 end
+function reparse!(ast::AbstractObaAST, src::AbstractString)
+end
 
 # ------------------------------------------------------------------
 # ObaAST

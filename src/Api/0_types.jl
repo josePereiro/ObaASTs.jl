@@ -90,7 +90,7 @@ end
 
 ## ------------------------------------------------------------------
 # Objects
-@ObaASTObj InternalLinkAST
+@ObaASTObj InternalLinkAST # TODO: Rename to wikilink
 @ObaASTObj TagAST
 @ObaASTObj LatexTagAST
 @ObaASTObj ObaScriptHeadAST
