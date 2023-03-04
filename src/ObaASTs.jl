@@ -7,7 +7,7 @@ module ObaASTs
     export ObaAST, InternalLinkAST, TagAST, TextLineAST, EmptyLineAST, HeaderLineAST, BlockLinkLineAST
     export CommentBlockAST, ObaScriptBlockAST, LatexTagAST, LatexBlockAST, CodeBlockAST, YamlBlockAST
     export parse_lines, parse_file, parse_string
-    export reparse!, resource!
+    export reparse, reparse!, resource!, replace!
     export parent_ast, source, is_emptyline
     export istextline, isemptyline, isheaderline, isblocklinkline, iscommentblock
     export isscriptblock, islatexblock, iscodeblock, isyamlblock

@@ -37,6 +37,9 @@ using Test
         @test ch.src == ch.src
     end
 
+    # full reparse
+    @test source(parse_string(source(AST))) == source(AST)
+
     # test modification
     len0 = length(AST0)
     tlAST = findfirst((ch) -> isa(ch, TextLineAST), AST0)
@@ -87,5 +90,6 @@ using Test
     sflags = get_flags(script_ast)
     @test sflags == "flags"
     @test all(hasflag.([script_ast], "flags"))
+
 
 end

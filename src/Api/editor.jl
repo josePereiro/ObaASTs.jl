@@ -1,5 +1,19 @@
 # ------------------------------------------------------------------
-# ObaAST
+export resource!
+function resource!(ch::AbstractObaASTChild, src::AbstractString)
+    ch.src = src
+    reparse!(parent_ast(ch))
+    return ch
+end
+
+import Base.replace!
+function replace!(ast::AbstractObaAST, old_new::Pair...; kwargs...)
+    new_src = replace(source(ast), old_new...; kwargs...)
+    reparse!(ast, new_src)
+    return ast
+end
+
+# ------------------------------------------------------------------
 export write!!
 write!!(io::IO, ast::ObaAST) = write(io, reparse!(ast))
 write!!(file::AbstractString, ast::ObaAST) = write(file, reparse!(ast))
