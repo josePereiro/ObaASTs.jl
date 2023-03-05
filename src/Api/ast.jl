@@ -131,3 +131,17 @@ foreach_inlinks(f::Function, ast::ObaAST) =  foreach_parsed(f, ast, :inlinks)
 hasinlink(f::Function, ast::ObaAST) = find_parsed(f, ast, :inlinks)
 hasinlink(ast::ObaAST, file::String) = hasinlink((inlinks) -> inlinks[:file] == file, ast)
 hasinlink(ast::ObaAST, reg::Regex) = hasinlink((inlinks) -> _hasmatch(reg, inlinks[:file]), ast)
+
+# ------------------------------------------------------------------
+# ObaScriptBlockAST
+function find_byid(new_ast::ObaAST, script_ast::ObaScriptBlockAST)
+    id0 = get_param(script_ast, "id")
+    isnothing(id0) && return nothing
+    for (idx, ch) in enumerate(new_ast)
+        isscriptblock(ch) || continue
+        id1 = get_param(script_ast, "id")
+        id1 == id0 && return idx
+    end
+    return nothing
+end
+find_byid(::ObaAST, ::AbstractObaASTChild) = nothing
