@@ -82,3 +82,5 @@ Base.get(f::Function, ast::AbstractObaASTObj, key::Symbol) = get(f, ast.parsed, 
 
 Base.keys(ast::AbstractObaASTChild) = keys(ast.parsed)
 Base.keys(ast::AbstractObaASTObj) = keys(ast.parsed)
+
+Base.isequal(ch1::AbstractObaASTChild, ch2::AbstractObaASTChild) = isequal(source(ch1), source(ch2))
