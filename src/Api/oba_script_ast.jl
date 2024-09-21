@@ -74,3 +74,8 @@ end
 
 export hasflag
 hasflag(ast::ObaScriptBlockAST, flag::String) = contains(get_flags(ast), flag)
+
+export headless_source
+function headless_source(ast::ObaScriptBlockAST)
+    return replace(source(ast), source(ast[:head]) => "")
+end

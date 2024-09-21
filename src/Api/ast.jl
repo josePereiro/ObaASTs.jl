@@ -50,6 +50,24 @@ reparse_counter(ch::ObaAST) = ch.reparse_counter
 export reparse_counter
 
 # ------------------------------------------------------------------
+export yaml_ast
+function yaml_ast(ch::ObaAST)
+    length(ch) == 0 && return nothing
+    ch0 = first(ch)
+    isyamlblock(ch0) || return nothing
+    return ch0
+end
+
+export yaml_dict
+function yaml_dict(ch::ObaAST)
+    ch = yaml_ast(ch)
+    isnothing(ch) && return Dict()
+    return yaml_dict(ch)
+end
+
+yaml_dict(ch::YamlBlockAST) = get(ch, :yaml, Dict())
+
+# ------------------------------------------------------------------
 # Type utils
 istextline(::AbstractObaAST) = false
 istextline(::TextLineAST) = true
@@ -134,14 +152,20 @@ hasinlink(ast::ObaAST, reg::Regex) = hasinlink((inlinks) -> _hasmatch(reg, inlin
 
 # ------------------------------------------------------------------
 # ObaScriptBlockAST
-function find_byid(new_ast::ObaAST, script_ast::ObaScriptBlockAST)
-    id0 = get_param(script_ast, "id")
-    isnothing(id0) && return nothing
+function find_byid(new_ast::ObaAST, id0::AbstractString)
     for (idx, ch) in enumerate(new_ast)
         isscriptblock(ch) || continue
-        id1 = get_param(script_ast, "id")
+        id1 = get_param(ch, "id", nothing)
+        isnothing(id1) && continue
         id1 == id0 && return idx
     end
     return nothing
 end
+
+function find_byid(new_ast::ObaAST, script_ast::ObaScriptBlockAST)
+    id0 = get_param(script_ast, "id", nothing)
+    isnothing(id0) && return nothing
+    return find_byid(new_ast, id0)
+end
+
 find_byid(::ObaAST, ::AbstractObaASTChild) = nothing
