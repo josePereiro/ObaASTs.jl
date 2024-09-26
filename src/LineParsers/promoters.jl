@@ -1,9 +1,11 @@
 # A set of functions which promote childs after the basic ones had been parsed
+# see ObaScriptBlockAST promoters as example
+#   CodeBlockAST ar CommentBlockAST can be promoted to ObaScriptBlockAST
+
 # ------------------------------------------------------------------
 # PROMOTERS_BOOK
 const PROMOTERS_BOOK = Dict{DataType, Vector{Function}}()
 
-export register_promoter!
 function register_promoter!(f::Function, T::DataType) 
     reg = get!(() -> Vector{Function}(), PROMOTERS_BOOK, T)
     return push!(reg, f)

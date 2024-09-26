@@ -3,7 +3,6 @@
 # REPARSERS_BOOK
 const REPARSERS_BOOK = Dict{DataType, Vector{Function}}()
 
-export register_reparser!
 function register_reparser!(f::Function, T::DataType) 
     reg = get!(() -> Vector{Function}(), REPARSERS_BOOK, T)
     return push!(reg, f)

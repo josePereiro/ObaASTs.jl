@@ -2,16 +2,6 @@ module ObaASTs
 
     import YAML
 
-    export @ObaASTChild
-    export AbstractObaAST, AbstractObaASTChild, AbstractObaASTObj
-    export ObaAST, InternalLinkAST, TagAST, TextLineAST, EmptyLineAST, HeaderLineAST, BlockLinkLineAST
-    export CommentBlockAST, ObaScriptBlockAST, LatexTagAST, LatexBlockAST, CodeBlockAST, YamlBlockAST
-    export parse_lines, parse_file, parse_string
-    export reparse, reparse!, resource!, replace!
-    export parent_ast, source, is_emptyline
-    export istextline, isemptyline, isheaderline, isblocklinkline, iscommentblock
-    export isscriptblock, islatexblock, iscodeblock, isyamlblock
-
     #! include Api
     include("Api/0_types.jl")
     include("Api/ast.jl")
@@ -42,6 +32,8 @@ module ObaASTs
     
     #! include .
     include("utils.jl")
+
+    @_exportall_non_underscore()
 
     function __init__()
 

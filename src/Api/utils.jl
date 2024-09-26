@@ -15,7 +15,6 @@ function find_byline(AST, line::Int)
     end
     return nothing
 end
-export find_byline
 
 # ------------------------------------------------------------------
 """
@@ -28,7 +27,6 @@ child_idx(ast::ObaAST, ch::AbstractObaASTChild) = findfirst(isequal(ch), ast)
 child_idx(::ObaAST, idx::Integer) = idx
 child_idx(ch::AbstractObaASTChild) = child_idx(parent_ast(ch), ch)
 child_idx(idx::Integer) = idx
-export child_idx
 
 # ------------------------------------------------------------------
 """
@@ -68,7 +66,6 @@ function iter_from(f::Function, AST::ObaAST, chidx::Integer, step::Integer, offs
     return
 
 end
-export iter_from
 
 iter_from(f::Function, ch::AbstractObaASTChild, step::Integer, offset::Integer = 0) =
     iter_from(f, parent_ast(ch), child_idx(ch), step, offset)
@@ -81,7 +78,6 @@ iter_from(f::Function, ch::AbstractObaASTChild;
 # regex
 match_src(reg::Regex, ch::AbstractObaASTChild) = match(reg, source(ch))
 match_src(reg::Regex, ch::AbstractObaASTObj) = match(reg, source(ch))
-export match_src
 
 # ------------------------------------------------------------------
 function Base.findnext(f::Function, ast::ObaAST, chidx::Integer)::Union{Int, Nothing}
@@ -97,3 +93,23 @@ function Base.findnext(f::Function, ast::ObaAST, chidx::Integer)::Union{Int, Not
 end
 
 Base.findnext(f::Function, ch::AbstractObaASTChild) = findnext(f, parent_ast(ch), child_idx(ch))
+
+
+# ------------------------------------------------------------------
+function _exportall(filter::Function, mod::Module)
+    for sym in names(mod; all = true, imported = true)
+        filter(sym) == true || continue
+        @eval mod export $(sym)
+    end
+end
+
+macro _exportall_non_underscore()
+    return quote
+        _exportall($(__module__)) do sym
+            sym == :eval && return false
+            sym == :include && return false
+            startswith(string(sym), r"@?[^_#]") && return true
+            return false
+        end
+    end
+end

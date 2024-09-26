@@ -134,6 +134,7 @@ end
 > **Note:** `Obsidian` allows placing such links either at the end of a line or in the next one. The former is ignored and the latter is the one supporter for the parser. 
 
 ```txt
+Some text in the line above the link.
 ^any-id-123
 ```
 

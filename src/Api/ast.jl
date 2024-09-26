@@ -44,13 +44,10 @@ parsed_dict(ast::AbstractObaASTObj) = ast.parsed
 parent_file(ch::ObaAST) = ch.file
 parent_file(ch::AbstractObaASTChild) = parent_file(parent_ast(ch))
 parent_file(ch::AbstractObaASTObj) = parent_file(parent_ast(ch))
-export parent_file
 
 reparse_counter(ch::ObaAST) = ch.reparse_counter
-export reparse_counter
 
 # ------------------------------------------------------------------
-export yaml_ast
 function yaml_ast(ch::ObaAST)
     length(ch) == 0 && return nothing
     ch0 = first(ch)
@@ -58,7 +55,6 @@ function yaml_ast(ch::ObaAST)
     return ch0
 end
 
-export yaml_dict
 function yaml_dict(ch::ObaAST)
     ch = yaml_ast(ch)
     isnothing(ch) && return Dict()
@@ -97,7 +93,6 @@ isyamlblock(::AbstractObaAST) = false
 isyamlblock(::YamlBlockAST) = true
 
 # ------------------------------------------------------------------
-export collect_parsed
 function collect_parsed(ast::ObaAST, key::Symbol; 
         T::DataType = Any, 
         reduce = (x) -> isa(x, Vector)
@@ -111,7 +106,6 @@ function collect_parsed(ast::ObaAST, key::Symbol;
     return objs
 end
 
-export foreach_parsed
 function foreach_parsed(f::Function, ast::ObaAST, key::Symbol)
     for ch in ast
         objs = get(ch, key, nothing)
@@ -123,7 +117,6 @@ function foreach_parsed(f::Function, ast::ObaAST, key::Symbol)
     return nothing
 end
 
-export find_parsed
 function find_parsed(f::Function, ast::ObaAST, key::Symbol)
     flag = false
     foreach_parsed(ast, key) do obj
@@ -134,7 +127,6 @@ end
 
 # ------------------------------------------------------------------
 # TagAST
-export hastag, tags, foreach_tag
 tags(ast::ObaAST) = collect_parsed(ast, :tags; T = TagAST)
 foreach_tag(f::Function, ast::ObaAST) = foreach_parsed(f, ast, :tags)
 hastag(f::Function, ast::ObaAST) = find_parsed(f, ast, :tags)
@@ -143,7 +135,6 @@ hastag(ast::ObaAST, reg::Regex) = hastag((tag) -> _hasmatch(reg, tag[:label]), a
 
 # ------------------------------------------------------------------
 # InternalLinkAST
-export hasinlink, inlinks, foreach_inlink
 inlinks(ast::ObaAST) = collect_parsed(ast, :inlinks; T = InternalLinkAST)
 foreach_inlinks(f::Function, ast::ObaAST) =  foreach_parsed(f, ast, :inlinks)
 hasinlink(f::Function, ast::ObaAST) = find_parsed(f, ast, :inlinks)

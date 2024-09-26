@@ -1,6 +1,5 @@
 # ------------------------------------------------------------------
 # ObaScriptBlockAST
-export set_script!
 function set_script!(cmd::ObaScriptBlockAST, new_script::AbstractString)
     old_script = cmd.parsed[:script]
     new_script = endswith(new_script, "\n") ? new_script : string(new_script, "\n")
@@ -9,7 +8,6 @@ function set_script!(cmd::ObaScriptBlockAST, new_script::AbstractString)
     return cmd
 end
 
-export set_head!
 function set_head!(cmd::ObaScriptBlockAST, new_head::AbstractString)
     old_head = source(cmd[:head])
     new_head = strip(new_head)
@@ -18,7 +16,6 @@ function set_head!(cmd::ObaScriptBlockAST, new_head::AbstractString)
     return cmd
 end
 
-export get_params
 get_params(ast::ObaScriptBlockAST, dflt = nothing) = get(ast[:head], :params, dflt)
    
 function _build_head_src(flags::AbstractString, params) 
@@ -36,14 +33,12 @@ function _build_head_src(flags::AbstractString, params)
     return string(strip(src))
 end
 
-export get_param
 function get_param(ast::ObaScriptBlockAST, key::String, dflt = nothing)
     params = get_params(ast)
     isnothing(params) && return dflt
     return get(params, key, dflt)
 end
 
-export set_param!
 function set_param!(cmd_ast::ObaScriptBlockAST, key::AbstractString, value)
     flags = get_flags(cmd_ast)
     params = get_params(cmd_ast)
@@ -53,16 +48,13 @@ function set_param!(cmd_ast::ObaScriptBlockAST, key::AbstractString, value)
     return set_head!(cmd_ast, new_head)
 end
 
-export hasparam
 function hasparam(cmd_ast::ObaScriptBlockAST, key::AbstractString) 
     params = get_params(cmd_ast)
     return isnothing(params) ? false : haskey(params, key)
 end
 
-export get_flags
 get_flags(ast::ObaScriptBlockAST) = get(ast[:head], :flags, "")
 
-export add_flags!
 function add_flags!(cmd_ast::ObaScriptBlockAST, flags::String)
     old_flags = get_flags(cmd_ast)
     params = get_params(cmd_ast)
@@ -72,10 +64,8 @@ function add_flags!(cmd_ast::ObaScriptBlockAST, flags::String)
     return set_head!(cmd_ast, new_head)
 end
 
-export hasflag
 hasflag(ast::ObaScriptBlockAST, flag::String) = contains(get_flags(ast), flag)
 
-export headless_source
 function headless_source(ast::ObaScriptBlockAST)
     return replace(source(ast), source(ast[:head]) => "")
 end

@@ -5,7 +5,7 @@ using Test
 @testset "ObaASTs.jl" begin
 
     # test file
-    fn = joinpath(@__DIR__, "test_file.txt")
+    fn = joinpath(@__DIR__, "test_file.md")
     # keep this sync with file
     file_content_types = [
         YamlBlockAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, CommentBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, CodeBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, TextLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, BlockLinkLineAST
@@ -90,6 +90,5 @@ using Test
     sflags = get_flags(script_ast)
     @test sflags == "flags"
     @test all(hasflag.([script_ast], "flags"))
-
 
 end

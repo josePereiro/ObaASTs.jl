@@ -1,5 +1,4 @@
 # ------------------------------------------------------------------
-export resource!
 function resource!(ch::AbstractObaASTChild, src::AbstractString)
     ch.src = src
     reparse!(parent_ast(ch))
@@ -21,7 +20,6 @@ function replace!(ast::AbstractObaAST, old_new::Pair...; kwargs...)
 end
 
 # ------------------------------------------------------------------
-export write!!
 write!!(io::IO, ast::ObaAST) = write(io, reparse!(ast))
 write!!(file::AbstractString, ast::ObaAST) = write(file, reparse!(ast))
 function write!!(ast::ObaAST)
@@ -46,4 +44,3 @@ cut_from!(ast::ObaAST, ch::AbstractObaASTChild, args...; kwargs...) =
     cut_from!(ast, child_idx(ch), args...; kwargs...) 
 cut_from!(ch::AbstractObaASTChild, args...; kwargs...) = 
     cut_from!(parent_ast(ch), ch, args...; kwargs...) 
-export cut_from!
