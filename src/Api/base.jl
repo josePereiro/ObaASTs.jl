@@ -111,3 +111,10 @@ import Base.match
 Base.match(reg::Regex, ch::AbstractObaAST) = match(reg, source(ch))
 Base.match(reg::Regex, ch::AbstractObaASTChild) = match(reg, source(ch))
 Base.match(reg::Regex, ch::AbstractObaASTObj) = match(reg, source(ch))
+
+function find_bysource(ast::AbstractObaAST, pt::Regex)
+    for ch in ast
+        _hasmatch(pt, source(ch)) && return ch
+    end
+    return nothing
+end
