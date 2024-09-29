@@ -1,6 +1,7 @@
 module ObaASTs
 
     import YAML
+    import MassExport
 
     #! include Api
     include("Api/0_types.jl")
@@ -34,7 +35,7 @@ module ObaASTs
     #! include .
     include("utils.jl")
 
-    @_exportall_non_underscore()
+    MassExport.@exportall_non_underscore()
 
     function __init__()
 

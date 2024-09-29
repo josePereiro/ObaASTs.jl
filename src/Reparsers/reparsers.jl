@@ -1,9 +1,3 @@
-# A set of functions which reparse childs after the basic ones had been parsed
-# - reparsing means recompuing the parsed field of a chield from a source.
-# - the source can be its own `src` field.
-# - this is needed after a modification to the `src` field of any child.
-# - note that modifying a child might change all others (ex: line number)
-
 # ------------------------------------------------------------------
 # REPARSERS_BOOK
 const REPARSERS_BOOK = Dict{DataType, Vector{Function}}()
@@ -24,54 +18,24 @@ end
 
 # ------------------------------------------------------------------
 # ObaAST
-_reparent!(ch::AbstractObaASTChild, new_parent::ObaAST) = (ch.parent = new_parent)
-function _reparent!(ast, new_parent::ObaAST)
-    for ch in ast
-        _reparent!(ch, new_parent)
+
+function _reparent!(dst_ast, new_parent::ObaAST)
+    for ch in dst_ast
+        ch.parent = new_parent
     end
 end
 
-function _up_new_ast!(_new_ast::ObaAST, ast::ObaAST)
-    _new_ast.reparse_counter = ast.reparse_counter + 1
-    _new_ast.file = ast.file
-    return _new_ast
+function _merge_meta!(dst_ast::ObaAST, src_ast::ObaAST)
+    dst_ast.reparse_counter = src_ast.reparse_counter + 1
+    dst_ast.file = src_ast.file
+    return dst_ast
 end
 
-function _up_childs!(ast::ObaAST, _new_ast::ObaAST)
-    # up ast
-    ast.reparse_counter += 1
-    resize!(ast.children, length(_new_ast.children))
-    ast.children .= _new_ast.children
-    _reparent!(ast.children, ast)
+function _transfer_children!(dst_ast::ObaAST, src_ast::ObaAST)
+    # up dst_ast
+    dst_ast.reparse_counter += 1
+    resize!(dst_ast.children, length(src_ast.children))
+    dst_ast.children .= src_ast.children
+    _reparent!(dst_ast, dst_ast) # regain parenhood
+    return nothing
 end
-
-function reparse(ast::ObaAST)
-    _parser = LineParser()
-    for child in ast
-        _feed_parser!(_parser, split(source(child), "\n"))
-    end
-    _new_ast = _parser.AST
-    foreach(reparse!, _new_ast)
-
-    _up_new_ast!(_new_ast, ast)
-    return ast
-end
-
-function reparse(ast::ObaAST, src::AbstractString)
-    _new_ast = parse_string(src)
-    _up_new_ast!(_new_ast, ast)
-end
-
-function reparse!(ast::ObaAST)
-    _new_ast = reparse(ast)
-    _up_childs!(ast, _new_ast)
-    return ast
-end
-
-function reparse!(ast::ObaAST, src::AbstractString)
-    _new_ast = reparse(ast, src)
-    _up_childs!(ast, _new_ast)
-
-    return ast
-end
-

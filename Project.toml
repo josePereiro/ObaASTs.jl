@@ -4,6 +4,7 @@ authors = ["josePereiro <jose.pereiro.personal@gmail.com> and contributors"]
 version = "0.4.0"
 
 [deps]
+MassExport = "bdad8087-1bf2-41e1-917c-1d9e34c2a82c"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]

@@ -2,7 +2,7 @@
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "87e7371eeda6eccab378234de2063e9cf2eccb2b"
+project_hash = "05f2053c66806fcbaf3dd90e8b1b248dab9e1b7d"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -28,6 +28,11 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "f9557a255370125b405568f9767d6d195822a175"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
 version = "1.17.0+0"
+
+[[deps.MassExport]]
+git-tree-sha1 = "ba8213f948f89dd92239a727f09f9c6d97865fcb"
+uuid = "bdad8087-1bf2-41e1-917c-1d9e34c2a82c"
+version = "1.0.2"
 
 [[deps.Preferences]]
 deps = ["TOML"]

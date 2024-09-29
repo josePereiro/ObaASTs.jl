@@ -62,7 +62,20 @@ function _parse_lines(lines)
 
     _feed_parser!(parser, lines)
     
-    # ----------------------------------------------------------------
+    # parsed childs
+    foreach(reparse!, parser.AST)
+
+    return parser.AST
+end
+
+function _parse_batch(batch)
+
+    parser = LineParser()
+
+    for lines in batch
+        _feed_parser!(parser, lines)
+    end
+    
     # parsed childs
     foreach(reparse!, parser.AST)
 

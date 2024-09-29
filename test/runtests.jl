@@ -6,7 +6,7 @@ using Test
 
     # test file
     fn = joinpath(@__DIR__, "test_file.md")
-    # keep this sync with file
+    # keep this sync with test file
     file_content_types = [
         YamlBlockAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, HeaderLineAST, EmptyLineAST, CommentBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, LatexBlockAST, EmptyLineAST, CodeBlockAST, EmptyLineAST, ObaScriptBlockAST, EmptyLineAST, TextLineAST, EmptyLineAST, TextLineAST, EmptyLineAST, BlockLinkLineAST
     ]
@@ -14,7 +14,7 @@ using Test
     AST = parse_file(fn)
     @test true # no error
 
-    # Test AST
+    # Test AST parsing
     @test length(AST) == length(file_content_types)
     for (child, test_type) in zip(AST, file_content_types)
         @test child isa test_type
@@ -28,26 +28,46 @@ using Test
     end
 
     # test reparse!
-    AST0 = deepcopy(AST)
+    # test parent stability
+    global AST0 = deepcopy(AST)
+    for ch in AST0
+        @test objectid(AST0) === objectid(parent_ast(ch))
+    end
     reparse!(AST0)
+    for ch in AST0
+        @test objectid(AST0) === objectid(parent_ast(ch))
+    end
+
     for (i, (ch, ch0)) in enumerate(zip(AST, AST0))
         @info("Testing line $(ch.line): $(typeof(ch))")
         @test typeof(ch) === typeof(ch0)
-        @test ch.line == ch.line
-        @test ch.src == ch.src
+        @test ch.line == ch0.line
+        @test ch.src == ch0.src
     end
 
     # full reparse
     @test source(parse_string(source(AST))) == source(AST)
-
+    
     # test modification
     len0 = length(AST0)
     tlAST = findfirst((ch) -> isa(ch, TextLineAST), AST0)
     @assert !isnothing(tlAST)
     AST0[tlAST].src = "Text line with two\nlines"
-    @assert len0 == length(AST0)
+    @test len0 == length(AST0)
     reparse!(AST0)
-    @assert len0 + 1 == length(AST0)
+    @test len0 + 1 == length(AST0)
+    for ch in AST0
+        @test objectid(AST0) === objectid(parent_ast(ch))
+    end
+    
+    # resource!
+    tlAST = findfirst((ch) -> isa(ch, TextLineAST), AST0)
+    @assert !isnothing(tlAST)
+    resource!(AST0[tlAST], "Text line with two\nlines")
+    @test len0 + 2 == length(AST0)
+    for ch in AST0
+        @test objectid(AST0) === objectid(parent_ast(ch))
+    end
 
     # TODO: Test individual children parsed labels
     # Use 'parse_string("A text [[wikilink]] #tag \$1+1\$")[1].parsed'

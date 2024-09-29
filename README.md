@@ -11,6 +11,14 @@ The main restriction is that all 'children' elements must be defined within line
 > **Note**: At the time of writing, the parser is working with all the notes (> 500) in my vault with `Obsidian v0.14.6`
 
 --- 
+### Install
+
+```julia
+] registry add https://github.com/josePereiro/Pereiro_Registry.jl
+] add ObaASTs
+```
+
+--- 
 ### Children
 #### Command block
 
@@ -268,11 +276,12 @@ reparse!(AST)
 ### resource!
 
 A more secure interface for modifying `src`. It call `reparse!` automatically.
+It can be called on a child or the whole ast. 
 
 ```julia
 AST[3]
 # HeaderLineAST "# This is a level 1 header"
-AST[3].src
+source(AST[3])
 # "# This is a level 1 header"
 AST[3][:lvl]
 # 1

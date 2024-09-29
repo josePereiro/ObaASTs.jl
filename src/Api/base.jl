@@ -29,14 +29,17 @@ Base.collect(ast::ObaAST) = collect(ast.children)
 
 Base.deleteat!(ast::ObaAST, i) = deleteat!(ast.children, child_idx(i))
 Base.splice!(ast::ObaAST, index) = splice!(ast.children, index)
-Base.splice!(ast::ObaAST, index, replacement) = splice!(ast.children, index, replacement)
+Base.splice!(ast::ObaAST, index, replacement) = 
+    splice!(ast.children, index, replacement)
 function Base.splice!(ast::ObaAST, index, replacement::AbstractString) 
     _src_ast = parse_string(replacement)
     _reparent!(_src_ast, ast)
     splice!(ast.children, index, _src_ast)
 end
-Base.insert!(ast::ObaAST, index, item::AbstractObaASTChild) = insert!(ast.children, child_idx(index), item)
-Base.insert!(ast::ObaAST, index, item) = (i = child_idx(index); splice!(ast, i:i - 1, item))
+Base.insert!(ast::ObaAST, index, item::AbstractObaASTChild) = 
+    insert!(ast.children, child_idx(index), item)
+Base.insert!(ast::ObaAST, index, item) = 
+    (i = child_idx(index); splice!(ast, i:i - 1, item))
 Base.append!(ast::ObaAST, items...) = append!(ast.children, items...)
 function Base.append!(ast::ObaAST, src::AbstractString)
     _src_ast = parse_string(src)
@@ -88,3 +91,23 @@ function Base.isequal(ch1::AbstractObaASTChild, ch2::AbstractObaASTChild)
     isequal(ch1.line, ch2.line) || return false
     return true
 end
+
+function Base.findnext(f::Function, ast::ObaAST, chidx::Integer)::Union{Int, Nothing}
+    found = nothing
+    iter_from(ast, chidx, 1, 1) do idx, ch
+        if f(ch) === true
+            found = idx
+            return true
+        end
+        return false
+    end
+    return found
+end
+
+Base.findnext(f::Function, ch::AbstractObaASTChild) = findnext(f, parent_ast(ch), child_idx(ch))
+
+# regex
+import Base.match
+Base.match(reg::Regex, ch::AbstractObaAST) = match(reg, source(ch))
+Base.match(reg::Regex, ch::AbstractObaASTChild) = match(reg, source(ch))
+Base.match(reg::Regex, ch::AbstractObaASTObj) = match(reg, source(ch))
