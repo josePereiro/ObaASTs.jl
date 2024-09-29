@@ -1,11 +1,11 @@
 name = "ObaASTs"
 uuid = "1070a898-5650-4dbc-bdc4-2f105286d314"
 authors = ["josePereiro <jose.pereiro.personal@gmail.com> and contributors"]
-version = "0.4.0"
+version = "0.5.0"
 
 [deps]
-MassExport = "bdad8087-1bf2-41e1-917c-1d9e34c2a82c"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+MassExport = "bdad8087-1bf2-41e1-917c-1d9e34c2a82c"
 
 [compat]
 julia = "1.6"
