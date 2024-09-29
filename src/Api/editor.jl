@@ -10,7 +10,7 @@ end
 write!(io::IO, ast::ObaAST) = write(io, reparse!(ast))
 write!(file::AbstractString, ast::ObaAST) = write(file, reparse!(ast))
 function write!(ast::ObaAST)
-    file = parent_file(ast)
+    file = source_file(ast)
     isnothing(file) && error("The ObaAST do not have a source file!")
     write(file, reparse!(ast))
 end

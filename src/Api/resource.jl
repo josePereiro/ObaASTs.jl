@@ -3,13 +3,14 @@
 
 function resource(ast::ObaAST, src::AbstractString)
     _new_ast = parse_string(src)
-    _merge_meta!(ast, _new_ast)
+    _merge_meta!(_new_ast, ast)
     return _new_ast
 end
 
 function resource!(ast::ObaAST, src::AbstractString)
     _new_ast = resource(ast, src)
     _transfer_children!(ast, _new_ast)
+    _merge_meta!(ast, _new_ast)
     return ast
 end
 
@@ -17,7 +18,7 @@ function resource!(ch::AbstractObaASTChild, src::AbstractString)
     ch.src = src
     reparse!(parent_ast(ch))
     return ch
-end
+end    
 
 function resource!(ch::YamlBlockAST, yaml::Dict)
     yaml_str = YAML.write(yaml)
@@ -39,7 +40,7 @@ function reparse(ast::ObaAST)
         split(source(child), "\n")
         for child in ast
     )
-    _merge_meta!(ast, _new_ast)
+    _merge_meta!(_new_ast, ast)
     return _new_ast
 end
 

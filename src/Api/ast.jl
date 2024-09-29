@@ -41,9 +41,9 @@ parent_ast(ast::AbstractObaAST) = ast.parent
 parsed_dict(ast::AbstractObaASTChild) = ast.parsed
 parsed_dict(ast::AbstractObaASTObj) = ast.parsed
 
-parent_file(ch::ObaAST) = ch.file
-parent_file(ch::AbstractObaASTChild) = parent_file(parent_ast(ch))
-parent_file(ch::AbstractObaASTObj) = parent_file(parent_ast(ch))
+source_file(ch::ObaAST) = ch.file
+source_file(ch::AbstractObaASTChild) = source_file(parent_ast(ch))
+source_file(ch::AbstractObaASTObj) = source_file(parent_ast(ch))
 
 reparse_counter(ch::ObaAST) = ch.reparse_counter
 

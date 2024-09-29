@@ -12,7 +12,9 @@ using Test
     ]
     
     AST = parse_file(fn)
+    file0 = source_file(AST)
     @test true # no error
+    @test file0 == fn
 
     # Test AST parsing
     @test length(AST) == length(file_content_types)
@@ -29,7 +31,7 @@ using Test
 
     # test reparse!
     # test parent stability
-    global AST0 = deepcopy(AST)
+    AST0 = deepcopy(AST)
     for ch in AST0
         @test objectid(AST0) === objectid(parent_ast(ch))
     end
@@ -39,7 +41,7 @@ using Test
     end
 
     for (i, (ch, ch0)) in enumerate(zip(AST, AST0))
-        @info("Testing line $(ch.line): $(typeof(ch))")
+        # @info("Testing line $(ch.line): $(typeof(ch))")
         @test typeof(ch) === typeof(ch0)
         @test ch.line == ch0.line
         @test ch.src == ch0.src
@@ -47,7 +49,7 @@ using Test
 
     # full reparse
     @test source(parse_string(source(AST))) == source(AST)
-    
+
     # test modification
     len0 = length(AST0)
     tlAST = findfirst((ch) -> isa(ch, TextLineAST), AST0)
@@ -62,8 +64,9 @@ using Test
     
     # resource!
     tlAST = findfirst((ch) -> isa(ch, TextLineAST), AST0)
-    @assert !isnothing(tlAST)
+    @assert !isnothing(tlAST) 
     resource!(AST0[tlAST], "Text line with two\nlines")
+    @test file0 == source_file(AST0)
     @test len0 + 2 == length(AST0)
     for ch in AST0
         @test objectid(AST0) === objectid(parent_ast(ch))
