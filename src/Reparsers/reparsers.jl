@@ -1,4 +1,9 @@
 # A set of functions which reparse childs after the basic ones had been parsed
+# - reparsing means recompuing the parsed field of a chield from a source.
+# - the source can be its own `src` field.
+# - this is needed after a modification to the `src` field of any child.
+# - note that modifying a child might change all others (ex: line number)
+
 # ------------------------------------------------------------------
 # REPARSERS_BOOK
 const REPARSERS_BOOK = Dict{DataType, Vector{Function}}()
@@ -32,7 +37,6 @@ function _up_new_ast!(_new_ast::ObaAST, ast::ObaAST)
     return _new_ast
 end
 
-
 function _up_childs!(ast::ObaAST, _new_ast::ObaAST)
     # up ast
     ast.reparse_counter += 1
@@ -50,6 +54,7 @@ function reparse(ast::ObaAST)
     foreach(reparse!, _new_ast)
 
     _up_new_ast!(_new_ast, ast)
+    return ast
 end
 
 function reparse(ast::ObaAST, src::AbstractString)

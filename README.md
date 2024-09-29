@@ -23,17 +23,10 @@ multiline block
 %%
 ```
 
-**Oba type**: 
-```julia
-mutable struct CommentBlockAST <: AbstractObaASTChild
-    # source meta
-    parent::ObaAST # The parent AST
-    src::String # The source code
-    line::Int # The line number
-    # parsed
-    body::String # Everything between both %%
-end
-```
+**Oba type**: `CommentBlockAST`
+- `.parsed` keys: 
+    - `:body` The comment text without `%%`s
+
 
 #### Latex block
 ```txt
@@ -44,42 +37,26 @@ multiline block
 $$
 ```
 
-**Oba type**: 
-```julia
-mutable struct LatexBlockAST <: AbstractObaASTChild
-	# source meta
-	parent::ObaAST # The parent AST
-	src::String # The source code
-	line::Int # The line number
-	# parsed
-	body::String # Everything between $$
-	tag::Union{LatexTagAST, Nothing} # A parsed \tag{ider} element
-end
-```
+**Oba type**: `LatexBlockAST`,  
+- `.parsed` keys: 
+    - `:body` The latex code betwwen `$$`s
+    - `:tag` Parse `\tag{eq-1}` statements
+
 
 #### Code block
 
 ````txt
 
-```[lang]
-Code
+```julia
+println("Hello Oba")
 ```
 
 ````
 
-
-**Oba type**: 
-```julia
-mutable struct CodeBlockAST <: AbstractObaASTChild
-# source meta
-	parent::ObaAST # The parent AST
-	src::String # The source code
-	line::Int # The line number
-	# parsed
-	lang::String # The language name
-	body::String # Everything between ``` except the language
-end
-```
+**Oba type**: `CodeBlockAST`,  
+- `.parsed` keys: 
+    - `:lang` The language name
+    - `:body` Everything between ``` except the language
 
 
 #### Yaml Block
@@ -91,20 +68,14 @@ creation-date: "2022:03:16-03:35:58"
 sr-due: 2022-07-26
 sr-interval: 80
 sr-ease: 250
+TAGS: ["#TODO"]
 ---
 ```
 
-**Oba type**: 
-```julia
-mutable struct YamlBlockAST <: AbstractObaASTChild
-    # source meta
-    parent::ObaAST # The parent AST
-	src::String # The source code
-	line::Int # The line number
-    # parsed
-    dict::Dict{String, Any} # the parsed yaml
-end
-```
+**Oba type**: `YamlBlockAST`,  
+- `.parsed` keys: 
+    - `:yaml` the parsed yaml
+    - `:tags` special section for tags
 
 
 #### Header line
@@ -115,19 +86,10 @@ end
 
 ```
 
-
-**Oba type**: 
-```julia
-mutable struct HeaderLineAST <: AbstractObaASTChild
-    # source meta
-    parent::ObaAST # The parent AST
-	src::String # The source code
-	line::Int # The line number
-    # parsed
-    title::String # The text after the #(s)
-    lvl::Int # The number of #(s)
-end
-```
+**Oba type**: `HeaderLineAST`,  
+- `.parsed` keys: 
+    - `:title` The text after the `#`(s)
+    - `:lvl` special section for tags
 
 #### Bock link line
 
@@ -138,18 +100,10 @@ Some text in the line above the link.
 ^any-id-123
 ```
 
-**Oba type**: 
-```julia
-mutable struct BlockLinkLineAST <: AbstractObaASTChild
-    # source meta
-    parent::ObaAST # The parent AST
-	src::String # The source code
-	line::Int # The line number
-    # parsed
-    link::String # the link id
-end
-```
 
+**Oba type**: `BlockLinkLineAST`,  
+- `.parsed` keys: 
+    - `:label` The link id
 
 #### Text line
 
@@ -157,27 +111,25 @@ end
 A single line of text, including [[links]], $inline latex$ and #tags
 ```
 
-```julia
-juliamutable struct TextLineAST <: AbstractObaASTChild
-    # source meta
-    parent::ObaAST # The parent AST
-	src::String # The source code
-	line::Int # The line number
-    # parsed
-    inlinks::Vector{InternalLinkAST} # the internal links 
-    tags::Vector{TagAST} # the tags
-end
-```
+**Oba type**: `TextLineAST`,  
+- `.parsed` keys: 
+    - `:wikilinks` found wikilinks
+    - `:tags` found tags
+    - `:latex` found inline latex (TODO)
+    - `:highlights` found highlights expressions (TODO)
 
 #### Empty line
 
 Just an empty line
 
+**Oba type**: `EmptyLineAST`
+
+
 ---
 
 ### ObaASTs vs Obsidian
 
-All the follow examples are allowed in `Obsidian` but not necessarily in `ObaASTs`.
+All the follow examples are allowed in `Obsidian` but not necessarily parsable by `ObaASTs`.
 
 **Allowed**
 ```txt
@@ -210,6 +162,24 @@ Text line
 Text line ^blockid
 ```
 
+All highlights or formating of text (**bold**, _italic_, etc) must occur in the same line.
+
+**Allowed**
+
+```txt
+Text ==line== 
+Text *line* 
+Text _line_ 
+```
+
+**Not Allowed**
+```txt
+Text ==line
+Text line
+Text line==
+Text line
+```
+
 ## Usage
 
 ### ObaAST
@@ -220,7 +190,7 @@ The package export several parser methods `parse_lines`, `parse_file`, `parse_st
 using ObaASTs
 
 # parse a file
-fn = abspath(joinpath(pathof(ObaASTs), "../..", "test", "test_file.txt"))
+fn = abspath(joinpath(pathof(ObaASTs), "../..", "test", "test_file.md"))
 AST = parse_file(fn)
 # ObaAST with 21 child(s)
 # child(s):
@@ -255,15 +225,15 @@ AST[3]
 # HeaderLineAST "# This is a level 1 header"
 AST[3].src
 # "# This is a level 1 header"
-AST[3].lvl
+AST[3][:lvl]
 # 1
 AST[3].src = "### Now you are level 3"
 # "### Now you are level 3"
-AST[3].lvl
-# 1
+AST[3][:lvl]
+# 1 <------ (NOTE: this is wrong!)
 reparse!(AST[3])
 # HeaderLineAST "### Now you are level 3"
-AST[3].lvl
+AST[3][:lvl]
 # 3
 ```
 
@@ -293,6 +263,23 @@ reparse!(AST)
 # [17] TextLineAST "This is just text with a link [[file#header|alias]] [[file#header|alias]] and a #Tag."
 # [19] TextLineAST "You can also link to specific headers in files\. Start typing a link like you would normally\. When the note you want is h"
 # [...]
+```
+
+### resource!
+
+A more secure interface for modifying `src`. It call `reparse!` automatically.
+
+```julia
+AST[3]
+# HeaderLineAST "# This is a level 1 header"
+AST[3].src
+# "# This is a level 1 header"
+AST[3][:lvl]
+# 1
+resource!(AST[3], "### Now you are level 3")
+# HeaderLineAST "### Now you are level 3"
+AST[3][:lvl]
+# 3 
 ```
 
 ### source

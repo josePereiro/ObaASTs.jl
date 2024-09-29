@@ -1,17 +1,4 @@
 # ------------------------------------------------------------------
-function resource!(ch::AbstractObaASTChild, src::AbstractString)
-    ch.src = src
-    reparse!(parent_ast(ch))
-    return ch
-end
-
-function resource!(ch::YamlBlockAST, yaml::Dict)
-    yaml_str = YAML.write(yaml)
-    src = string("---\n", strip(yaml_str), "\n---")
-    return resource!(ch, src)
-end
-
-# ------------------------------------------------------------------
 import Base.replace!
 function replace!(ast::AbstractObaAST, old_new::Pair...; kwargs...)
     new_src = replace(source(ast), old_new...; kwargs...)

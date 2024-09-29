@@ -134,12 +134,12 @@ hastag(ast::ObaAST, label::String) = hastag((tag) -> tag[:label] == label, ast)
 hastag(ast::ObaAST, reg::Regex) = hastag((tag) -> _hasmatch(reg, tag[:label]), ast)
 
 # ------------------------------------------------------------------
-# InternalLinkAST
-inlinks(ast::ObaAST) = collect_parsed(ast, :inlinks; T = InternalLinkAST)
-foreach_inlinks(f::Function, ast::ObaAST) =  foreach_parsed(f, ast, :inlinks)
-hasinlink(f::Function, ast::ObaAST) = find_parsed(f, ast, :inlinks)
-hasinlink(ast::ObaAST, file::String) = hasinlink((inlinks) -> inlinks[:file] == file, ast)
-hasinlink(ast::ObaAST, reg::Regex) = hasinlink((inlinks) -> _hasmatch(reg, inlinks[:file]), ast)
+# WikiLinkAST
+wikilinks(ast::ObaAST) = collect_parsed(ast, :wikilinks; T = WikiLinkAST)
+foreach_wikilinks(f::Function, ast::ObaAST) =  foreach_parsed(f, ast, :wikilinks)
+hasinlink(f::Function, ast::ObaAST) = find_parsed(f, ast, :wikilinks)
+hasinlink(ast::ObaAST, file::String) = hasinlink((wikilinks) -> wikilinks[:file] == file, ast)
+hasinlink(ast::ObaAST, reg::Regex) = hasinlink((wikilinks) -> _hasmatch(reg, wikilinks[:file]), ast)
 
 # ------------------------------------------------------------------
 # ObaScriptBlockAST

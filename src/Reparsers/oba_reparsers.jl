@@ -144,12 +144,12 @@ function _oba_reparse!(ast::TextLineAST)
 
     # links
     for rmatch in eachmatch(INTERNAL_LINK_PARSE_REGEX, src)
-        get!(ast.parsed, :inlinks) do
-            InternalLinkAST[]
+        get!(ast.parsed, :wikilinks) do
+            WikiLinkAST[]
         end
 
         link_src_ = _get_match(rmatch, :src)
-        link_ast = InternalLinkAST(
+        link_ast = WikiLinkAST(
             #= parent =# ast,
             #= src =# link_src_,
             #= pos =# _match_pos(rmatch)
@@ -157,7 +157,7 @@ function _oba_reparse!(ast::TextLineAST)
         link_ast.parsed[:file] = _get_match(rmatch, :file, nothing)
         link_ast.parsed[:header] = _get_match(rmatch, :header, nothing)
         link_ast.parsed[:alias] = _get_match(rmatch, :alias, nothing)
-        push!(ast.parsed[:inlinks], link_ast)
+        push!(ast.parsed[:wikilinks], link_ast)
         
         # digest starting for the links (To avoid tags-like headers)
         # (On duplicated links) This works because the links are searched in `src` not in `dig`.

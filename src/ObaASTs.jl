@@ -9,6 +9,7 @@ module ObaASTs
     include("Api/editor.jl")
     include("Api/oba_script_ast.jl")
     include("Api/parser.jl")
+    include("Api/resource.jl")
     include("Api/utils.jl")
     
     #! include LineParsers

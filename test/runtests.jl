@@ -49,7 +49,9 @@ using Test
     reparse!(AST0)
     @assert len0 + 1 == length(AST0)
 
-    # TODO: Test individual children
+    # TODO: Test individual children parsed labels
+    # Use 'parse_string("A text [[wikilink]] #tag \$1+1\$")[1].parsed'
+    # test cases
     
     # Utils
     # child_idx
