@@ -4,14 +4,19 @@ authors = ["josePereiro <jose.pereiro.personal@gmail.com> and contributors"]
 version = "0.5.2"
 
 [deps]
-YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 MassExport = "bdad8087-1bf2-41e1-917c-1d9e34c2a82c"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
 julia = "1.6"
+Aqua = "=0.8.8"
+MassExport = "1"
+YAML = "0.4"
+Test = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 
 [targets]
-test = ["Test"]
+test = ["Test", "Aqua"]

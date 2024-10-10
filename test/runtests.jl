@@ -2,7 +2,12 @@ using ObaASTs
 using Test
 
 ## ------------------------------------------------------------------
+
+## ------------------------------------------------------------------
 @testset "ObaASTs.jl" begin
+
+    # Aqua
+    include("Aqua.jl")
 
     # test file
     fn = joinpath(@__DIR__, "test_file.md")

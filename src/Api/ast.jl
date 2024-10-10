@@ -19,6 +19,10 @@ function source(ast::ObaAST, idxs)
     return join(srcs, "\n")
 end
 
+# break ambiguity
+source(ast0::ObaAST, ast1::AbstractObaAST) = 
+    string(source(ast0), "\n", source(ast1))
+
 function source(ast::AbstractObaAST, asts::AbstractObaAST...)
     srcs = String[source(ast)]
     for asti in asts

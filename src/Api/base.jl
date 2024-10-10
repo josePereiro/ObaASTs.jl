@@ -1,5 +1,6 @@
 # ------------------------------------------------------------------
 # base
+import Base.write
 Base.write(io::IO, ast::AbstractObaAST) = write(io, source(ast), "\n")
 function Base.write(io::IO, astv::Vector{<:AbstractObaAST}) 
     b = 0
@@ -9,7 +10,12 @@ function Base.write(io::IO, astv::Vector{<:AbstractObaAST})
     return b
 end
 
-Base.write(io::IO, AST::ObaAST) = write(io, AST.children)
+Base.write(io::IO, ast::ObaAST) = write(io, ast.children)
+function Base.write(ast::ObaAST)
+    file = source_file(ast)
+    isnothing(file) && error("The ObaAST do not have a source file!")
+    write(source_file(ast), ast)
+end
 
 Base.read(io::IO, ::Type{ObaAST}) = parse_string(read(io, String))
 Base.read(file::AbstractString, ::Type{ObaAST}) = parse_file(file)
